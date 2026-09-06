@@ -1,0 +1,7 @@
+{
+  "name": "HK금융파트너스 목동지점",
+  "description": "HK금융파트너스 경인사업본부 목동지점 공식 웹사이트. 지점장 윤상진. 1:1 맞춤형 보장분석 및 신입/경력 보험설계사 리크루팅 & 멘토링 플랫폼.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

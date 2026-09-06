@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" fill="none" className="w-full h-full">
+  <!-- Heungkuk Magenta Geometric Emblem -->
+  <rect x="4" y="8" width="16" height="16" fill="#E2007A" rx="1" />
+  <rect x="4" y="32" width="16" height="16" fill="#E2007A" rx="1" />
+  <!-- Diamond in center-right of emblem -->
+  <rect x="28" y="8" width="28" height="28" fill="#E2007A" rx="1.5" transform="rotate(45 42 22)" />
+  
+  <!-- Text: Heungkuk (Deep Navy / Indigo) -->
+  <text x="80" y="24" fill="#201060" font-family="'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="800" letter-spacing="-0.5px">Heungkuk</text>
+  
+  <!-- Text: HK금융파트너스 (Deep Navy / Indigo) -->
+  <text x="80" y="52" fill="#201060" font-family="'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="21" font-weight="900" letter-spacing="-0.8px">HK 금융파트너스</text>
+</svg>
