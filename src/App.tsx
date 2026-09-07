@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationPage, CompanyInfo } from './types';
+import React, { useState } from 'react';
+import { CompanyInfo } from './types';
 import { initialCompanyInfo } from './data/company';
+import { useRouter } from './router/useRouter';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { MobileStickyBar } from './components/layout/MobileStickyBar';
@@ -11,16 +12,26 @@ import { AdminConfigModal } from './components/common/AdminConfigModal';
 
 // Pages
 import { HomePage } from './pages/HomePage';
-import { BranchPage } from './pages/BranchPage';
-import { ProductsPage } from './pages/ProductsPage';
-import { ConsultingPage } from './pages/ConsultingPage';
-import { RecruitmentPage } from './pages/RecruitmentPage';
-import { InfoPage } from './pages/InfoPage';
+import { BranchAboutPage } from './pages/about/BranchAboutPage';
+import { ManagerPage } from './pages/about/ManagerPage';
+import { InsuranceHubPage } from './pages/insurance/InsuranceHubPage';
+import { InsuranceDetailPage } from './pages/insurance/InsuranceDetailPage';
+import { ConsultingHubPage } from './pages/consulting/ConsultingHubPage';
+import { CoverageAnalysisPage } from './pages/consulting/CoverageAnalysisPage';
+import { ConsultationFormPage } from './pages/consulting/ConsultationFormPage';
+import { RecruitHubPage } from './pages/recruit/RecruitHubPage';
+import { RecruitProcessPage } from './pages/recruit/RecruitProcessPage';
+import { RecruitSupportPage } from './pages/recruit/RecruitSupportPage';
+import { RecruitStoryPage } from './pages/recruit/RecruitStoryPage';
+import { InsuranceInfoHubPage } from './pages/insurance-info/InsuranceInfoHubPage';
+import { InsuranceInfoDetailPage } from './pages/insurance-info/InsuranceInfoDetailPage';
+import { ContactPage } from './pages/ContactPage';
 import { FAQPage } from './pages/FAQPage';
-import { LegalPages } from './pages/LegalPages';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsPage } from './pages/TermsPage';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<NavigationPage>('home');
+  const { currentPath, navigate } = useRouter();
   const [consultModalOpen, setConsultModalOpen] = useState(false);
   const [consultCategory, setConsultCategory] = useState<string>('보험 전체 점검 (보장분석)');
   const [recruitModalOpen, setRecruitModalOpen] = useState(false);
@@ -59,38 +70,192 @@ export default function App() {
     setRecruitModalOpen(true);
   };
 
-  const handleNavigate = (page: NavigationPage) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Sync hash routing if user opens with #recruit or #consult
-  useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash === 'recruit' || hash === 'recruitment') {
-      setCurrentPage('recruitment');
-    } else if (hash === 'consult' || hash === 'consulting') {
-      setCurrentPage('consulting');
-    } else if (hash === 'branch') {
-      setCurrentPage('branch');
-    } else if (hash === 'products') {
-      setCurrentPage('products');
-    } else if (hash === 'info') {
-      setCurrentPage('info');
-    } else if (hash === 'faq') {
-      setCurrentPage('faq');
+  const renderCurrentPage = () => {
+    if (currentPath === '/' || currentPath === '') {
+      return (
+        <HomePage
+          companyInfo={companyInfo}
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
     }
-  }, []);
+
+    if (currentPath === '/about' || currentPath === '/about/company') {
+      return (
+        <BranchAboutPage
+          companyInfo={companyInfo}
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/about/manager') {
+      return (
+        <ManagerPage
+          companyInfo={companyInfo}
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/insurance') {
+      return (
+        <InsuranceHubPage
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath.startsWith('/insurance/')) {
+      const type = currentPath.replace('/insurance/', '');
+      return (
+        <InsuranceDetailPage
+          type={type}
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath === '/consulting') {
+      return (
+        <ConsultingHubPage
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath === '/consulting/analysis') {
+      return (
+        <CoverageAnalysisPage
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath === '/consulting/consultation') {
+      return (
+        <ConsultationFormPage
+          companyInfo={companyInfo}
+          onNavigate={navigate}
+        />
+      );
+    }
+
+    if (currentPath === '/recruit') {
+      return (
+        <RecruitHubPage
+          companyInfo={companyInfo}
+          onNavigate={navigate}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/recruit/process') {
+      return (
+        <RecruitProcessPage
+          onNavigate={navigate}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/recruit/support') {
+      return (
+        <RecruitSupportPage
+          onNavigate={navigate}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/recruit/story') {
+      return (
+        <RecruitStoryPage
+          onNavigate={navigate}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/insurance-info') {
+      return (
+        <InsuranceInfoHubPage
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath.startsWith('/insurance-info/')) {
+      const slug = currentPath.replace('/insurance-info/', '');
+      return (
+        <InsuranceInfoDetailPage
+          slug={slug}
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath === '/contact') {
+      return (
+        <ContactPage
+          companyInfo={companyInfo}
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+        />
+      );
+    }
+
+    if (currentPath === '/faq') {
+      return (
+        <FAQPage
+          onNavigate={navigate}
+          onOpenConsult={handleOpenConsult}
+          onOpenRecruit={handleOpenRecruit}
+        />
+      );
+    }
+
+    if (currentPath === '/privacy') {
+      return <PrivacyPolicyPage onNavigate={navigate} />;
+    }
+
+    if (currentPath === '/terms') {
+      return <TermsPage onNavigate={navigate} />;
+    }
+
+    // Default Fallback
+    return (
+      <HomePage
+        companyInfo={companyInfo}
+        onNavigate={navigate}
+        onOpenConsult={handleOpenConsult}
+        onOpenRecruit={handleOpenRecruit}
+      />
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-slate-900 selection:bg-blue-100 selection:text-blue-900">
       {/* Dynamic SEO Structured Data (JSON-LD) */}
-      <StructuredData companyInfo={companyInfo} currentPage={currentPage} />
+      <StructuredData companyInfo={companyInfo} currentPath={currentPath} />
 
-      {/* Main Global Header */}
+      {/* Main Global Header with Active Route Highlight & Breadcrumbs */}
       <Header
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
+        currentPath={currentPath}
+        onNavigate={navigate}
         onOpenConsult={handleOpenConsult}
         onOpenRecruit={handleOpenRecruit}
         onOpenAdminConfig={() => setAdminConfigOpen(true)}
@@ -98,66 +263,12 @@ export default function App() {
       />
 
       {/* Main Page Routing Views */}
-      <main className="flex-1">
-        {currentPage === 'home' && (
-          <HomePage
-            companyInfo={companyInfo}
-            onOpenConsult={handleOpenConsult}
-            onOpenRecruit={handleOpenRecruit}
-            onNavigate={handleNavigate}
-          />
-        )}
+      <main className="flex-1">{renderCurrentPage()}</main>
 
-        {currentPage === 'branch' && (
-          <BranchPage
-            companyInfo={companyInfo}
-            onOpenConsult={() => handleOpenConsult(`목동지점장 ${companyInfo.leaderName} 1:1 상담`)}
-            onOpenRecruit={handleOpenRecruit}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {currentPage === 'products' && (
-          <ProductsPage onOpenConsult={handleOpenConsult} />
-        )}
-
-        {currentPage === 'consulting' && (
-          <ConsultingPage
-            companyInfo={companyInfo}
-            onOpenConsultModal={handleOpenConsult}
-          />
-        )}
-
-        {currentPage === 'recruitment' && (
-          <RecruitmentPage
-            companyInfo={companyInfo}
-            onOpenRecruitModal={handleOpenRecruit}
-          />
-        )}
-
-        {currentPage === 'info' && (
-          <InfoPage onOpenConsult={handleOpenConsult} />
-        )}
-
-        {currentPage === 'faq' && (
-          <FAQPage
-            onOpenConsult={handleOpenConsult}
-            onOpenRecruit={handleOpenRecruit}
-          />
-        )}
-
-        {currentPage === 'privacy' && (
-          <LegalPages type="privacy" companyInfo={companyInfo} />
-        )}
-
-        {currentPage === 'terms' && (
-          <LegalPages type="terms" companyInfo={companyInfo} />
-        )}
-      </main>
-
-      {/* Global Footer */}
+      {/* Global Multi-Page Footer with Secured Admin PIN Entry */}
       <Footer
-        onNavigate={handleNavigate}
+        currentPath={currentPath}
+        onNavigate={navigate}
         onOpenConsult={handleOpenConsult}
         onOpenRecruit={handleOpenRecruit}
         onOpenAdminConfig={() => setAdminConfigOpen(true)}
@@ -185,7 +296,7 @@ export default function App() {
         companyInfo={companyInfo}
       />
 
-      {/* Admin Information & Placeholder Config Modal */}
+      {/* Admin Information & Config Modal */}
       <AdminConfigModal
         isOpen={adminConfigOpen}
         onClose={() => setAdminConfigOpen(false)}

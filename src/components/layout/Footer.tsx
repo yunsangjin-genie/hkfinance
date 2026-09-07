@@ -1,10 +1,10 @@
-import React from 'react';
-import { Shield, Phone, Mail, MapPin, Clock, ArrowRight, ExternalLink, Settings, Sparkles } from 'lucide-react';
-import { NavigationPage, CompanyInfo } from '../../types';
+import React, { useState } from 'react';
+import { Phone, Mail, MapPin, Clock, Lock, ShieldCheck } from 'lucide-react';
+import { CompanyInfo } from '../../types';
 import { HKLogo } from '../common/HKLogo';
 
 interface FooterProps {
-  onNavigate: (page: NavigationPage) => void;
+  onNavigate: (path: string) => void;
   onOpenConsult: (category?: string) => void;
   onOpenRecruit: () => void;
   onOpenAdminConfig: () => void;
@@ -13,219 +13,246 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({
   onNavigate,
-  onOpenConsult,
-  onOpenRecruit,
   onOpenAdminConfig,
   companyInfo,
 }) => {
+  const [showAdminPrompt, setShowAdminPrompt] = useState(false);
+  const [adminPin, setAdminPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+
+  const handleAdminAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Default PIN: 1234 or branch manager phone last 4 digits (8554)
+    if (adminPin === '1234' || adminPin === '8554') {
+      setShowAdminPrompt(false);
+      setAdminPin('');
+      setPinError(false);
+      onOpenAdminConfig();
+    } else {
+      setPinError(true);
+    }
+  };
+
   return (
-    <footer className="bg-slate-950 text-slate-400 border-t border-slate-800 text-xs leading-relaxed pb-24 md:pb-12">
-      {/* Top Banner inside Footer */}
-      <div className="border-b border-slate-800/80 bg-slate-900/60 py-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <span className="text-blue-400 font-semibold text-xs tracking-wider uppercase mb-1 block">
-              HK FINANCIAL PARTNERS · MOKDONG BRANCH
-            </span>
-            <h3 className="text-lg md:text-xl font-bold text-white">
-              {companyInfo.mainSlogan}
-            </h3>
-            <p className="text-slate-400 text-xs md:text-sm mt-1">
-              {companyInfo.fullName} (지점장 {companyInfo.leaderName})
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => onOpenConsult('보험 전체 점검')}
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition flex items-center gap-1.5"
-            >
-              <span>보험 상담 신청</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={onOpenRecruit}
-              className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl transition flex items-center gap-1.5"
-            >
-              <span>설계사 지원하기</span>
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Footer Links & Info */}
+    <footer className="bg-slate-950 text-slate-400 border-t border-slate-800 text-xs leading-relaxed pb-24 sm:pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand Info */}
-          <div className="md:col-span-2 space-y-3.5">
-            <div className="flex items-center space-x-3 text-white">
-              <HKLogo variant="light" size="md" />
-              <div className="border-l border-slate-700 pl-2.5">
-                <span className="text-xs font-bold text-slate-300 block">
-                  {companyInfo.branch || '목동지점'}
-                </span>
-                <span className="text-[11px] text-slate-500 block">
-                  {companyInfo.division || '경인사업본부'}
-                </span>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+          {/* Brand & Address Column */}
+          <div className="md:col-span-6 space-y-3">
+            <div className="flex items-center space-x-2.5">
+              <HKLogo size="sm" />
+              <div>
+                <h4 className="text-white font-bold text-sm leading-tight">
+                  {companyInfo.fullName}
+                </h4>
+                <p className="text-[11px] text-slate-400">
+                  지점장 {companyInfo.leaderName}
+                </p>
               </div>
             </div>
 
-            <div className="space-y-1.5 text-xs text-slate-400">
-              <p className="text-slate-300 font-medium">
-                • 지점장 / 팀장: <strong className="text-white">{companyInfo.leaderName}</strong>
-              </p>
-              <p className="flex items-start gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
-                <span>주소: ({companyInfo.zipCode || '07997'}) {companyInfo.address} {companyInfo.detailAddress}</span>
+            <p className="text-xs text-slate-300 font-medium pt-1">
+              "보험을 권하기보다, 필요한 보장을 함께 설계합니다."
+            </p>
+
+            <div className="space-y-1 text-slate-400 text-[11px] pt-1">
+              <p className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span>{companyInfo.address} {companyInfo.detailAddress}</span>
               </p>
               <p className="flex items-center gap-1.5">
                 <Phone className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>직통: <a href={`tel:${companyInfo.mobile || companyInfo.phone}`} className="text-blue-400 hover:underline">{companyInfo.mobile || companyInfo.phone}</a></span>
-                <span className="text-slate-600">|</span>
-                <span>대표전화: <a href={`tel:${companyInfo.tel || '1566-8163'}`} className="hover:underline">{companyInfo.tel || '1566-8163'}</a></span>
+                <span>지점장 직통: {companyInfo.mobile} | 대표전화: {companyInfo.tel}</span>
               </p>
               <p className="flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>이메일: <a href={`mailto:${companyInfo.email}`} className="text-slate-300 hover:underline">{companyInfo.email}</a></span>
-                <span className="text-slate-600">|</span>
-                <span>팩스: {companyInfo.fax || '0504-441-8554'}</span>
+                <span>이메일: {companyInfo.email} | 팩스: {companyInfo.fax}</span>
               </p>
               <p className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                <span>상담 시간: {companyInfo.consultHours}</span>
+                <span>{companyInfo.consultHours}</span>
               </p>
             </div>
+          </div>
 
-            <div className="pt-2">
-              <button
-                onClick={onOpenAdminConfig}
-                className="inline-flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-300 underline underline-offset-4"
-              >
-                <Settings className="w-3 h-3" />
-                <span>[관리자] 지점 공식 정보 및 연락처 수정</span>
-              </button>
+          {/* Quick Links Column */}
+          <div className="md:col-span-6 flex flex-col sm:flex-row justify-end gap-8 sm:gap-12 pt-2 md:pt-0">
+            <div>
+              <h5 className="text-white font-bold text-xs mb-3 uppercase tracking-wider">주요 메뉴</h5>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <button
+                    onClick={() => onNavigate('/about')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    목동지점 소개
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/about/manager')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    지점장 소개
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/consulting')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    보험상담 안내
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/insurance')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    보험상품 가이드
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="text-white font-bold text-xs mb-3 uppercase tracking-wider">설계사 및 정보</h5>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <button
+                    onClick={() => onNavigate('/recruit')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    설계사 지원
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/insurance-info')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    보험정보 허브
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/contact')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    오시는 길
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/faq')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    자주 묻는 질문
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h5 className="text-white font-bold text-xs mb-3 uppercase tracking-wider">이용 정책</h5>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <button
+                    onClick={() => onNavigate('/privacy')}
+                    className="hover:text-white transition font-medium text-slate-300 cursor-pointer"
+                  >
+                    개인정보처리방침
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => onNavigate('/terms')}
+                    className="hover:text-white transition cursor-pointer"
+                  >
+                    이용약관
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
-
-          {/* Quick Menu - Customers */}
-          <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">
-              고객 서비스 &amp; 상담
-            </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <button
-                  onClick={() => onNavigate('consulting')}
-                  className="hover:text-white transition"
-                >
-                  무료 보장분석 신청
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('products')}
-                  className="hover:text-white transition"
-                >
-                  고민별 보험상품 안내
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('info')}
-                  className="hover:text-white transition"
-                >
-                  보험 상식 &amp; 리모델링 가이드
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('faq')}
-                  className="hover:text-white transition"
-                >
-                  자주 묻는 질문 (FAQ)
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('branch')}
-                  className="hover:text-white transition"
-                >
-                  목동지점 소개 &amp; {companyInfo.leaderName} 지점장 인사말
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Quick Menu - Recruitment & Policy */}
-          <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-3">
-              설계사 지원 &amp; 정책
-            </h4>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <button
-                  onClick={() => onNavigate('recruitment')}
-                  className="hover:text-white transition text-indigo-400 font-semibold"
-                >
-                  설계사 지원 혜택 (5대 지원)
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('recruitment')}
-                  className="hover:text-white transition"
-                >
-                  7단계 신입 성장 로드맵
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('privacy')}
-                  className="hover:text-white transition"
-                >
-                  개인정보처리방침
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onNavigate('terms')}
-                  className="hover:text-white transition"
-                >
-                  이용약관 및 금융소비자보호
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => onOpenRecruit()}
-                  className="hover:text-white transition text-slate-300 font-medium"
-                >
-                  설계사 1:1 진로 상담 신청
-                </button>
-              </li>
-            </ul>
-          </div>
         </div>
 
-        {/* Compliance & Consumer Protection Legal Notice */}
-        <div className="mt-8 pt-6 border-t border-slate-800/80 space-y-2 text-[11px] text-slate-500 leading-normal">
-          <p className="font-semibold text-slate-400">
-            [금융소비자보호 및 광고 심의 준수 안내]
+        {/* Compliance Notice */}
+        <div className="mt-8 pt-6 border-t border-slate-800/80 text-[11px] text-slate-500 space-y-1 leading-relaxed">
+          <p className="flex items-center gap-1.5 font-medium text-slate-400">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+            <span>금융소비자보호 및 준법 고지</span>
           </p>
           <p>
-            • 본 웹사이트의 모든 보험 관련 콘텐츠와 상담 내용은 고객의 이해를 돕기 위한 정보 제공 목적이며, 실제 계약 체결 시에는 해당 보험회사의 약관 및 상품설명서가 우선 적용됩니다.
+            HK금융파트너스는 금융소비자보호법을 준수하며, 다수 보험사와 제휴된 법인보험대리점(GA)으로서 공정하고 객관적인 보장분석 및 비교상담을 제공합니다.
+            본 웹사이트에 게재된 보험 관련 정보는 이해를 돕기 위한 예시 및 일반적 안내이며, 가입 전 상품설명서와 약관을 반드시 확인하시기 바랍니다.
           </p>
-          <p>
-            • 보험계약 시 피보험자의 연령, 성별, 직업, 과거 병력 및 건강 상태에 따라 가입 한도, 인수 조건 및 보험료가 달라지거나 가입이 제한될 수 있습니다.
-          </p>
-          <p>
-            • 당 지점은 특정 수익률이나 보험금 지급 금액을 임의로 보장하지 않으며, 관계 법령(금융소비자보호법 등)을 철저히 준수합니다.
-          </p>
-          <p className="pt-2 text-slate-600">
-            Copyright © {new Date().getFullYear()} {companyInfo.fullName}. All rights reserved.
-          </p>
+        </div>
+
+        {/* Bottom Copyright & Discreet Admin Access */}
+        <div className="mt-6 pt-4 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 gap-2">
+          <p>© {new Date().getFullYear()} {companyInfo.fullName}. All rights reserved.</p>
+
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setShowAdminPrompt(true)}
+              className="text-slate-600 hover:text-slate-400 flex items-center gap-1 transition cursor-pointer"
+              title="관리자 설정"
+            >
+              <Lock className="w-3 h-3" />
+              <span>관리자 설정</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Admin Authentication Prompt Modal */}
+      {showAdminPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl text-slate-200">
+            <div className="flex items-center gap-2 font-bold text-white mb-2">
+              <Lock className="w-4 h-4 text-blue-400" />
+              <span>지점 관리자 인증</span>
+            </div>
+            <p className="text-xs text-slate-400 mb-4">
+              지점 정보 및 연락처 수정을 위해 관리자 비밀번호를 입력해 주세요. (기본: 1234)
+            </p>
+
+            <form onSubmit={handleAdminAuth} className="space-y-3">
+              <input
+                type="password"
+                placeholder="비밀번호 입력"
+                value={adminPin}
+                onChange={(e) => {
+                  setAdminPin(e.target.value);
+                  setPinError(false);
+                }}
+                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-hidden focus:border-blue-500"
+                autoFocus
+              />
+              {pinError && (
+                <p className="text-[11px] text-rose-400">비밀번호가 올바르지 않습니다.</p>
+              )}
+
+              <div className="flex items-center justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPrompt(false)}
+                  className="px-3.5 py-2 text-xs text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition cursor-pointer"
+                >
+                  확인
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </footer>
   );
 };

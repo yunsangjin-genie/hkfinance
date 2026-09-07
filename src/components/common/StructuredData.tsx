@@ -1,21 +1,31 @@
 import React from 'react';
-import { CompanyInfo, NavigationPage } from '../../types';
+import { CompanyInfo } from '../../types';
 import { faqItems } from '../../data/faqs';
 import { initialCompanyInfo } from '../../data/company';
+import { blogPosts } from '../../data/blog';
+import { SITE_ROUTES } from '../../router/routes';
 
 interface StructuredDataProps {
   companyInfo?: CompanyInfo;
-  currentPage: NavigationPage;
+  currentPath: string;
 }
 
-export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, currentPage }) => {
+export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, currentPath }) => {
   const company = companyInfo || initialCompanyInfo;
+  const currentRoute = SITE_ROUTES[currentPath];
+
+  // Base Organization & FinancialService Schema
   const schemaOrganization = {
     '@context': 'https://schema.org',
     '@type': 'FinancialService',
     '@id': 'https://mokdong.hkfp.co.kr/#organization',
     name: company.fullName,
-    alternateName: ['HK금융파트너스 목동지점', 'HK금융파트너스 경인사업본부 목동지점'],
+    alternateName: [
+      'HK금융파트너스 목동지점',
+      'HK금융파트너스 경인사업본부 목동지점',
+      '목동 보험상담',
+      '윤상진 지점장',
+    ],
     url: 'https://mokdong.hkfp.co.kr/',
     logo: 'https://mokdong.hkfp.co.kr/logo.png',
     description: company.mainSlogan + ' ' + company.coreMessage,
@@ -23,9 +33,9 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
     address: {
       '@type': 'PostalAddress',
       streetAddress: `${company.address} ${company.detailAddress}`,
-      addressLocality: '강남구 역삼동',
+      addressLocality: '양천구 목동',
       addressRegion: '서울특별시',
-      postalCode: company.zipCode || '06123',
+      postalCode: company.zipCode || '07997',
       addressCountry: 'KR',
     },
     telephone: company.mobile || company.phone,
@@ -33,8 +43,8 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
     faxNumber: company.fax,
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 37.5013,
-      longitude: 127.0256,
+      latitude: 37.5244,
+      longitude: 126.8753,
     },
     openingHoursSpecification: [
       {
@@ -56,50 +66,62 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
       { '@type': 'AdministrativeArea', name: '서울특별시 영등포구' },
       { '@type': 'AdministrativeArea', name: '수도권' },
     ],
-    hasOfferCatalog: {
-      '@type': 'OfferCatalog',
-      name: '보험 상담 및 보장분석 서비스',
-      itemListElement: [
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: '실손의료보험 맞춤 상담' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: '3대 질병 암·뇌·심장 보장분석' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: '연금 및 노후 준비 컨설팅' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: '화재 및 재산종합보험 설계' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: '보험설계사 신입/경력 리크루팅 및 교육' } },
-      ],
-    },
   };
 
-  const schemaFAQ = {
+  // BreadcrumbList Schema
+  const breadcrumbItems = currentRoute?.breadcrumb || [{ name: '홈', path: '/' }];
+  const schemaBreadcrumb = {
     '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqItems.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.directAnswer + (item.detailedExplanation ? ' ' + item.detailedExplanation : ''),
-      },
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbItems.map((item, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: item.name,
+      item: item.path ? `https://mokdong.hkfp.co.kr${item.path}` : undefined,
     })),
   };
 
-  const schemaBreadcrumbs = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: '홈',
-        item: 'https://mokdong.hkfp.co.kr/',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: currentPage === 'home' ? '메인' : currentPage,
-        item: `https://mokdong.hkfp.co.kr/${currentPage === 'home' ? '' : currentPage}`,
-      },
-    ],
-  };
+  // Dynamic FAQPage Schema
+  const schemaFAQ = currentPath === '/faq'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqItems.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.directAnswer + (item.detailedExplanation ? ' ' + item.detailedExplanation : ''),
+          },
+        })),
+      }
+    : null;
+
+  // Dynamic Blog Article Schema
+  let schemaArticle = null;
+  if (currentPath.startsWith('/insurance-info/')) {
+    const slug = currentPath.replace('/insurance-info/', '');
+    const post = blogPosts.find((p) => p.id === slug);
+    if (post) {
+      schemaArticle = {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: post.title,
+        description: post.summary,
+        author: {
+          '@type': 'Person',
+          name: post.author,
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: company.fullName,
+        },
+        datePublished: post.publishDate.replace(/\./g, '-'),
+        dateModified: post.updateDate ? post.updateDate.replace(/\./g, '-') : undefined,
+        mainEntityOfPage: `https://mokdong.hkfp.co.kr/insurance-info/${post.id}`,
+      };
+    }
+  }
 
   return (
     <>
@@ -109,12 +131,20 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaFAQ) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumb) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumbs) }}
-      />
+      {schemaFAQ && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaFAQ) }}
+        />
+      )}
+      {schemaArticle && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaArticle) }}
+        />
+      )}
     </>
   );
 };

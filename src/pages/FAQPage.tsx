@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { HelpCircle, Search, ChevronDown, ChevronUp, Sparkles, CheckCircle2, ShieldCheck, Briefcase } from 'lucide-react';
 import { faqItems } from '../data/faqs';
 import { FAQItem } from '../types';
+import { Breadcrumb } from '../components/common/Breadcrumb';
 
 interface FAQPageProps {
+  onNavigate?: (path: string) => void;
   onOpenConsult: (category?: string) => void;
   onOpenRecruit: () => void;
 }
 
-export const FAQPage: React.FC<FAQPageProps> = ({ onOpenConsult, onOpenRecruit }) => {
+export const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, onOpenConsult, onOpenRecruit }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('전체');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [openIds, setOpenIds] = useState<{ [key: string]: boolean }>({
@@ -33,20 +35,43 @@ export const FAQPage: React.FC<FAQPageProps> = ({ onOpenConsult, onOpenRecruit }
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {onNavigate && (
+        <Breadcrumb
+          items={[
+            { name: '홈', path: '/' },
+            { name: '자주 묻는 질문' },
+          ]}
+          onNavigate={onNavigate}
+        />
+      )}
       {/* Header */}
-      <section className="bg-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+      <header className="bg-slate-900 text-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-blue-400 bg-blue-950 px-3.5 py-1 rounded-full border border-blue-800">
-            FREQUENTLY ASKED QUESTIONS &amp; GEO
+            FREQUENTLY ASKED QUESTIONS · 목동 FAQ
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            자주 묻는 질문 &amp; 핵심 안내
+            자주 묻는 질문 (FAQ)
           </h1>
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto">
-            HK금융파트너스 목동지점의 서비스, 보장분석, 설계사 채용에 대해 가장 많이 주시는 질문들을 모았습니다.
+          <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
+            HK금융파트너스 경인사업본부 목동지점의 보장분석, 객관적 비교상담, 보험설계사 자격시험 및 정착 지원에 관한 주요 질문과 직관적 답변 모음입니다. 서울 목동을 기반으로 하는 보험 상담 지점으로서, 고객과 예비 설계사가 궁금해하는 핵심 사항을 명확하고 투명하게 안내합니다.
           </p>
+          <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
+            <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
+              WHO: HK금융파트너스 목동지점
+            </span>
+            <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
+              WHERE: 서울 목동 보험상담 지점
+            </span>
+            <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
+              WHAT: 자주 묻는 질문 &amp; 직관 답변
+            </span>
+            <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
+              WHO FOR: 보험 상담 고객 &amp; 예비 설계사
+            </span>
+          </div>
         </div>
-      </section>
+      </header>
 
       {/* Main Content Area */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
