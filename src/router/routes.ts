@@ -132,7 +132,7 @@ export const SITE_ROUTES: Record<string, RouteMeta> = {
   '/contact': {
     path: '/contact',
     title: '지점 위치 및 연락처 | HK금융파트너스 목동지점 오시는 길',
-    description: 'HK금융파트너스 경인사업본부 목동지점 위치(오목교역 인근), 상담 시간, 직통 전화 및 방문 예약 안내.',
+    description: 'HK금융파트너스 경인사업본부 목동지점 위치(강남구 역삼동 708-33), 상담 시간, 직통 전화 및 방문 예약 안내.',
     breadcrumb: [{ name: '홈', path: '/' }, { name: '오시는 길' }],
   },
   '/faq': {

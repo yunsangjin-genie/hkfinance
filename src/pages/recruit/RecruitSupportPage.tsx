@@ -86,9 +86,9 @@ export const RecruitSupportPage: React.FC<RecruitSupportPageProps> = ({
       icon: Laptop,
       highlight: '활동에만 집중할 수 있는 쾌적한 비즈니스 환경.',
       description:
-        '지하철 오목교역 인근에 위치한 쾌적한 지점 오피스 공간, 개별 업무 데스크, 고객 접견용 회의실, 전용 프린터 및 모바일 디지털 명함을 무상 제공합니다.',
+        '쾌적한 지점 오피스 공간, 개별 업무 데스크, 고객 접견용 회의실, 전용 프린터 및 모바일 디지털 명함을 무상 제공합니다.',
       features: [
-        '목동역·오목교역 역세권 지점 시설 및 상담 룸 완비',
+        '파라다이스 밴처타워 6층 지점 시설 및 고객 상담 룸 완비',
         '개인별 모바일 디지털 명함 및 온라인 소개 페이지 지원',
         '고객 설명용 전문 브로슈어 및 보장 안내 자료 제공',
       ],
@@ -116,14 +116,14 @@ export const RecruitSupportPage: React.FC<RecruitSupportPageProps> = ({
             설계사 지원 시스템
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            신입 설계사가 겪는 자격시험 부담, 상품 학습, 비교설계, 첫 고객 상담의 어려움을 해소하는 목동지점만의 지원 체계를 안내합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 실무 중심의 밀착 멘토링을 제공합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람 모두에게 실질적인 성장 인프라를 제공합니다.
+            신입 설계사가 겪는 자격시험 부담, 상품 학습, 비교설계, 첫 고객 상담의 어려움을 해소하는 목동지점만의 지원 체계를 안내합니다. HK금융파트너스 경인사업본부 목동지점은 실무 중심의 밀착 멘토링을 제공합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람 모두에게 실질적인 성장 인프라를 제공합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-indigo-300">
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
-              WHERE: 서울 목동 지점
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHAT: 시험비용·1:1비교설계·상담동행

@@ -33,19 +33,18 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
     slogan: company.mainSlogan,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: `${company.address} ${company.detailAddress}`,
-      addressLocality: '양천구 목동',
+      streetAddress: `${company.address} ${company.detailAddress}`.trim(),
+      addressLocality: '강남구 역삼동',
       addressRegion: '서울특별시',
-      postalCode: company.zipCode || '07997',
       addressCountry: 'KR',
     },
-    telephone: company.mobile || company.phone,
+    telephone: company.tel || '070-8252-9712',
     email: company.email,
     faxNumber: company.fax,
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: 37.5244,
-      longitude: 126.8753,
+      latitude: 37.5034,
+      longitude: 127.0448,
     },
     openingHoursSpecification: [
       {
@@ -62,10 +61,9 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
       description: company.leaderGreeting,
     },
     areaServed: [
-      { '@type': 'AdministrativeArea', name: '서울특별시 양천구' },
-      { '@type': 'AdministrativeArea', name: '서울특별시 강서구' },
-      { '@type': 'AdministrativeArea', name: '서울특별시 영등포구' },
+      { '@type': 'AdministrativeArea', name: '서울특별시' },
       { '@type': 'AdministrativeArea', name: '수도권' },
+      { '@type': 'AdministrativeArea', name: '전국' },
     ],
   };
 

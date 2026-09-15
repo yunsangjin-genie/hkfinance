@@ -153,7 +153,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                 type="text"
                 value={form.tel || ''}
                 onChange={(e) => setForm({ ...form, tel: e.target.value })}
-                placeholder="1566-8163"
+                placeholder="070-8252-9712"
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
               />
             </div>
@@ -189,19 +189,19 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                 type="text"
                 value={form.zipCode || ''}
                 onChange={(e) => setForm({ ...form, zipCode: e.target.value })}
-                placeholder="06123"
+                placeholder="우편번호"
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
               />
             </div>
 
             {/* Address */}
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-700 mb-1">지점 도로명 주소</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">지점 주소</label>
               <input
                 type="text"
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
-                placeholder="서울특별시 강남구 강남대로 442 (역삼동)"
+                placeholder="강남구 역삼동 708-33"
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
               />
             </div>
@@ -213,7 +213,7 @@ export const AdminConfigModal: React.FC<AdminConfigModalProps> = ({
                 type="text"
                 value={form.detailAddress}
                 onChange={(e) => setForm({ ...form, detailAddress: e.target.value })}
-                placeholder="6층"
+                placeholder="파라다이스 밴처타워 6층"
                 className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
               />
             </div>

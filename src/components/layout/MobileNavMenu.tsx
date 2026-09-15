@@ -486,13 +486,24 @@ export const MobileNavMenu: React.FC<MobileNavMenuProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+              <span>대표전화:</span>
+              <a
+                href={`tel:${(companyInfo.tel || '070-8252-9712').replace(/[^0-9]/g, '')}`}
+                className="font-bold text-white hover:text-blue-300 underline"
+              >
+                {companyInfo.tel || '070-8252-9712'}
+              </a>
+            </div>
+
+            <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-              <span>상담시간: {companyInfo.consultHours} (사전 예약 시 야간/주말 가능)</span>
+              <span>상담시간: {companyInfo.consultHours}</span>
             </div>
 
             <div className="flex items-center gap-2">
               <MapPin className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-              <span>소재지: 서울특별시 양천구 목동 (오목교역/목동역 인근)</span>
+              <span>소재지: {companyInfo.address} {companyInfo.detailAddress}</span>
             </div>
           </div>
 

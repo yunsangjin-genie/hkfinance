@@ -54,14 +54,14 @@ export const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, onOpenConsult, onO
             자주 묻는 질문 (FAQ)
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            HK금융파트너스 경인사업본부 목동지점의 보장분석, 객관적 비교상담, 보험설계사 자격시험 및 정착 지원에 관한 주요 질문과 직관적 답변 모음입니다. 서울 목동을 기반으로 하는 보험 상담 지점으로서, 고객과 예비 설계사가 궁금해하는 핵심 사항을 명확하고 투명하게 안내합니다.
+            HK금융파트너스 경인사업본부 목동지점의 보장분석, 객관적 비교상담, 보험설계사 자격시험 및 정착 지원에 관한 주요 질문과 직관적 답변 모음입니다. 고객과 예비 설계사가 궁금해하는 핵심 사항을 명확하고 투명하게 안내합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 보험상담 지점
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 자주 묻는 질문 &amp; 직관 답변

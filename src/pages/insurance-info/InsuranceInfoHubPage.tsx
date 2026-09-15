@@ -50,14 +50,14 @@ export const InsuranceInfoHubPage: React.FC<InsuranceInfoHubPageProps> = ({
             보험정보 허브
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            어려운 보험 용어, 4세대 실손 비교, 보험 리모델링 주의사항을 알기 쉽게 정리한 보험 전문 칼럼 모음입니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 금융소비자의 합리적인 선택을 돕는 유익한 정보들을 정기적으로 업데이트합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 열린 지식 아카이브입니다.
+            어려운 보험 용어, 4세대 실손 비교, 보험 리모델링 주의사항을 알기 쉽게 정리한 보험 전문 칼럼 모음입니다. HK금융파트너스 경인사업본부 목동지점은 금융소비자의 합리적인 선택을 돕는 유익한 정보들을 정기적으로 업데이트합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 열린 지식 아카이브입니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 보험정보센터
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 실손·건강·리모델링 핵심 가이드

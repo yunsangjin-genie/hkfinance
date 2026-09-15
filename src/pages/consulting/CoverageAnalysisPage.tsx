@@ -56,14 +56,14 @@ export const CoverageAnalysisPage: React.FC<CoverageAnalysisPageProps> = ({
             내 보험 보장분석
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            불필요한 보험료 누수를 막고 부족한 핵심 담보를 점검하는 맞춤 보장분석 안내입니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 기존 가입 증권을 대조하여 객관적인 리포트와 개선 방향을 제시합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람 모두에게 투명한 분석 기준을 제공합니다.
+            불필요한 보험료 누수를 막고 부족한 핵심 담보를 점검하는 맞춤 보장분석 안내입니다. HK금융파트너스 경인사업본부 목동지점은 기존 가입 증권을 대조하여 객관적인 리포트와 개선 방향을 제시합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람 모두에게 투명한 분석 기준을 제공합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 보장분석
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 중복·공백 진단 & 증권 정밀 대조

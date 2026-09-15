@@ -39,20 +39,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({
       <header className="bg-slate-900 text-white py-14 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center space-y-4">
           <span className="inline-block px-3 py-1 rounded-full bg-blue-950 text-blue-300 text-xs font-bold border border-blue-800">
-            LOCATION &amp; CONTACT · 목동 오시는 길
+            LOCATION &amp; CONTACT · 목동지점 오시는 길
           </span>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
             오시는 길 및 연락처
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            지하철 5호선 오목교역 인근에 위치한 목동지점 오시는 길과 직통 연락처 안내입니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 쾌적한 전용 상담실과 주차 시설을 완비하고 있습니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 분을 따뜻하게 맞이합니다.
+            HK금융파트너스 경인사업본부 목동지점 오시는 길과 직통 연락처 안내입니다. 쾌적한 전용 상담실과 편의 시설을 완비하고 있으며, 보험 상담이 필요한 고객과 보험설계사를 시작하려는 분을 따뜻하게 맞이합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 양천구 목동 (오목교역)
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 방문 상담 및 내방 안내
@@ -97,11 +97,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({
                 <div>
                   <span className="font-bold text-slate-900 block">전화번호</span>
                   <span className="text-slate-600">
-                    지점장 직통: <strong>{companyInfo.mobile}</strong>
+                    지점장 직통: <a href={`tel:${companyInfo.mobile.replace(/[^0-9]/g, '')}`} className="font-bold text-blue-700 hover:underline">{companyInfo.mobile}</a>
                   </span>
                   <br />
-                  <span className="text-slate-500">
-                    대표전화: {companyInfo.tel} | 팩스: {companyInfo.fax}
+                  <span className="text-slate-600">
+                    대표전화: <a href={`tel:${(companyInfo.tel || '070-8252-9712').replace(/[^0-9]/g, '')}`} className="font-bold text-blue-700 hover:underline">{companyInfo.tel || '070-8252-9712'}</a> | 팩스: {companyInfo.fax}
                   </span>
                 </div>
               </div>
@@ -142,20 +142,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({
             <div className="bg-white rounded-2xl p-7 border border-slate-200 shadow-xs space-y-4">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Train className="w-5 h-5 text-indigo-600" />
-                <span>대중교통 이용 안내</span>
+                <span>위치 및 방문 안내</span>
               </h3>
               <div className="space-y-3 text-xs text-slate-600 leading-relaxed">
                 <div className="p-3.5 bg-indigo-50/50 rounded-xl border border-indigo-100">
                   <strong className="text-indigo-950 font-bold block mb-1">
-                    지하철 5호선 오목교역 (목동운동장앞)
+                    사무실 위치
                   </strong>
-                  오목교역 2번 또는 3번 출구에서 도보 약 3~5분 거리 (목동 현대백화점 및 방송회관 인근)
+                  강남구 역삼동 708-33 파라다이스 밴처타워 6층에 위치하고 있습니다.
                 </div>
                 <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
                   <strong className="text-slate-900 font-bold block mb-1">
-                    간선·지선 버스 노선
+                    방문 상담 예약
                   </strong>
-                  목동대학타워, 오목교역 정류장 하차 (603, 640, 650, 5012, 6211, 6628, 6638 등)
+                  원활한 1:1 맞춤 상담 및 상담실 배정을 위해 사전 방문 예약을 권장해 드립니다.
                 </div>
               </div>
             </div>
@@ -167,10 +167,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </h3>
               <div className="text-xs text-slate-600 leading-relaxed space-y-2">
                 <p>
-                  네비게이션에 <strong>"목동 현대백화점"</strong> 또는 <strong>"오목교역"</strong>을 검색하시면 편리합니다.
+                  네비게이션에 <strong>"파라다이스 밴처타워"</strong> 또는 <strong>"강남구 역삼동 708-33"</strong>을 검색하시면 편리합니다.
                 </p>
                 <p className="text-slate-500">
-                  건물 내 지하 주차장 이용이 가능하며, 사전 상담 예약 고객께는 무료 주차권을 지원해 드립니다.
+                  건물 내 주차장 이용이 가능하며, 사전 상담 예약 고객께는 주차 편의를 지원해 드립니다.
                 </p>
               </div>
             </div>

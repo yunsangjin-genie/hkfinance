@@ -5,7 +5,17 @@ import { renderToString } from 'react-dom/server';
 import App from '../src/App';
 import { SITE_ROUTES } from '../src/router/routes';
 import { blogPosts } from '../src/data/blog';
-import { SITE_URL, SITE_DOMAIN, LEGACY_DOMAINS, getCanonicalUrl } from '../src/config/site';
+import {
+  SITE_URL,
+  SITE_DOMAIN,
+  LEGACY_DOMAINS,
+  getCanonicalUrl,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_WIDTH,
+  DEFAULT_OG_IMAGE_HEIGHT,
+  DEFAULT_OG_IMAGE_TYPE,
+} from '../src/config/site';
+import { generateOgImage } from './generate-og-image';
 
 // Target production dist directory
 const distDir = path.resolve(process.cwd(), 'dist');
@@ -16,7 +26,49 @@ if (!fs.existsSync(templateHtmlPath)) {
   process.exit(1);
 }
 
+// 1. Generate and synchronize official 1200x630 OG image
+console.log(`\n======================================================`);
+console.log(`[OG Image Generator] Generating and verifying SNS representative image...`);
+await generateOgImage();
+
+const distImagesDir = path.join(distDir, 'images');
+if (!fs.existsSync(distImagesDir)) {
+  fs.mkdirSync(distImagesDir, { recursive: true });
+}
+
+const publicOgJpg = path.resolve(process.cwd(), 'public/images/og-image.jpg');
+const publicOgPng = path.resolve(process.cwd(), 'public/images/og-image.png');
+
+if (fs.existsSync(publicOgJpg)) {
+  fs.copyFileSync(publicOgJpg, path.join(distImagesDir, 'og-image.jpg'));
+  fs.copyFileSync(publicOgJpg, path.join(distDir, 'og-image.jpg'));
+  console.log(`  ✓ Synced og-image.jpg to dist/images/ and dist/`);
+}
+if (fs.existsSync(publicOgPng)) {
+  fs.copyFileSync(publicOgPng, path.join(distImagesDir, 'og-image.png'));
+  fs.copyFileSync(publicOgPng, path.join(distDir, 'og-image.png'));
+  console.log(`  ✓ Synced og-image.png to dist/images/ and dist/`);
+}
+
 const templateHtml = fs.readFileSync(templateHtmlPath, 'utf-8');
+
+// Helper to reliably upsert meta tags without duplicates
+function upsertMetaTag(html: string, attr: 'name' | 'property', key: string, value: string): string {
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const removeRegex = new RegExp(`\\s*<meta\\s+${attr}="${escapedKey}"\\s+content=".*?"\\s*\\/?>`, 'gi');
+  let cleanHtml = html.replace(removeRegex, '');
+
+  const newTag = `    <meta ${attr}="${key}" content="${value}" />`;
+  return cleanHtml.replace('</head>', `${newTag}\n  </head>`);
+}
+
+// Helper to reliably upsert canonical link without duplicates
+function upsertCanonical(html: string, url: string): string {
+  const removeRegex = /\s*<link\s+rel="canonical"\s+href=".*?"\s*\/?>/gi;
+  let cleanHtml = html.replace(removeRegex, '');
+  const newTag = `    <link rel="canonical" href="${url}" />`;
+  return cleanHtml.replace('</head>', `${newTag}\n  </head>`);
+}
 
 // All predefined routes from SITE_ROUTES + dynamic blog detail pages
 const allRoutePaths = Object.keys(SITE_ROUTES);
@@ -32,6 +84,7 @@ blogPosts.forEach((post) => {
 console.log(`\n======================================================`);
 console.log(`[SSG] Starting Static Site Generation for ${allRoutePaths.length} routes...`);
 console.log(`[SSG] Canonical Base Domain: ${SITE_URL}`);
+console.log(`[SSG] Default OG Image: ${DEFAULT_OG_IMAGE}`);
 console.log(`======================================================\n`);
 
 let generatedCount = 0;
@@ -53,7 +106,7 @@ for (const routePath of allRoutePaths) {
           description: post.summary,
           keywords: [post.category, ...post.tags].join(', '),
           category: '보험정보',
-          ogImage: `${SITE_URL}/logo.png`,
+          ogImage: DEFAULT_OG_IMAGE,
           breadcrumb: [
             { name: '홈', path: '/' },
             { name: '보험정보', path: '/insurance-info' },
@@ -63,12 +116,42 @@ for (const routePath of allRoutePaths) {
       }
     }
 
-    const title = meta?.title || 'HK금융파트너스 경인사업본부 목동지점 | 맞춤 보험상담 & 설계사 리크루팅';
-    const description =
-      meta?.description ||
-      'HK금융파트너스 경인사업본부 목동지점 공식 웹사이트. 1:1 객관적 보장분석, 실손·건강·암·종신보험 비교상담 및 설계사 정착 지원.';
+    const isHome = routePath === '/' || routePath === '';
+
+    // Page Title
+    const title = isHome
+      ? 'HK금융파트너스 경인사업본부 목동지점 | 맞춤 보험 상담 & 설계사 멘토링'
+      : (meta?.title || 'HK금융파트너스 경인사업본부 목동지점');
+
+    // Page Description
+    const description = isHome
+      ? '보험을 권하기보다, 필요한 보장을 함께 설계합니다. HK금융파트너스 경인사업본부 목동지점'
+      : (meta?.description || '보험을 권하기보다, 필요한 보장을 함께 설계합니다. HK금융파트너스 경인사업본부 목동지점');
+
     const canonicalUrl = getCanonicalUrl(routePath);
-    const ogImageUrl = meta?.ogImage || `${SITE_URL}/og-image.png`;
+    const ogImageUrl = meta?.ogImage || DEFAULT_OG_IMAGE;
+
+    // OpenGraph Title & Description
+    const ogTitle = isHome
+      ? 'HK금융파트너스 경인사업본부 목동지점'
+      : (meta?.title || 'HK금융파트너스 경인사업본부 목동지점');
+
+    const ogDescription = isHome
+      ? '보험을 권하기보다, 필요한 보장을 함께 설계합니다. HK금융파트너스 경인사업본부 목동지점'
+      : (meta?.description || '보험을 권하기보다, 필요한 보장을 함께 설계합니다.');
+
+    // Twitter Card Title & Description
+    const twitterTitle = isHome
+      ? 'HK금융파트너스 경인사업본부 목동지점'
+      : (meta?.title || 'HK금융파트너스 경인사업본부 목동지점');
+
+    const twitterDescription = isHome
+      ? '보험을 권하기보다, 필요한 보장을 함께 설계합니다.'
+      : (meta?.description || '보험을 권하기보다, 필요한 보장을 함께 설계합니다.');
+
+    const ogType = routePath.startsWith('/insurance-info/') && routePath !== '/insurance-info'
+      ? 'article'
+      : 'website';
 
     // 3. Inject into HTML Template
     let pageHtml = templateHtml;
@@ -76,49 +159,35 @@ for (const routePath of allRoutePaths) {
     // Replace Title
     pageHtml = pageHtml.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
 
+    // Replace Canonical Link
+    pageHtml = upsertCanonical(pageHtml, canonicalUrl);
+
     // Replace Meta Description
-    if (pageHtml.includes('<meta name="description"')) {
-      pageHtml = pageHtml.replace(
-        /<meta\s+name="description"\s+content=".*?"\s*\/?>/i,
-        `<meta name="description" content="${description}" />`
-      );
-    } else {
-      pageHtml = pageHtml.replace(
-        '</head>',
-        `  <meta name="description" content="${description}" />\n</head>`
-      );
-    }
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'description', description);
 
-    // Replace or Insert Canonical
-    if (pageHtml.includes('rel="canonical"')) {
-      pageHtml = pageHtml.replace(
-        /<link\s+rel="canonical"\s+href=".*?"\s*\/?>/i,
-        `<link rel="canonical" href="${canonicalUrl}" />`
-      );
-    } else {
-      pageHtml = pageHtml.replace(
-        '</head>',
-        `  <link rel="canonical" href="${canonicalUrl}" />\n</head>`
-      );
-    }
+    // Replace OpenGraph tags (ensuring zero duplicates)
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:type', ogType);
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:locale', 'ko_KR');
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:site_name', 'HK금융파트너스 경인사업본부 목동지점');
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:title', ogTitle);
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:description', ogDescription);
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:url', canonicalUrl);
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:image', ogImageUrl);
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:image:width', String(DEFAULT_OG_IMAGE_WIDTH));
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:image:height', String(DEFAULT_OG_IMAGE_HEIGHT));
+    pageHtml = upsertMetaTag(pageHtml, 'property', 'og:image:type', DEFAULT_OG_IMAGE_TYPE);
 
-    // Replace OpenGraph Title & Description & URL & Image
-    pageHtml = pageHtml.replace(
-      /<meta\s+property="og:title"\s+content=".*?"\s*\/?>/i,
-      `<meta property="og:title" content="${title}" />`
-    );
-    pageHtml = pageHtml.replace(
-      /<meta\s+property="og:description"\s+content=".*?"\s*\/?>/i,
-      `<meta property="og:description" content="${description}" />`
-    );
-    pageHtml = pageHtml.replace(
-      /<meta\s+property="og:url"\s+content=".*?"\s*\/?>/i,
-      `<meta property="og:url" content="${canonicalUrl}" />`
-    );
-    pageHtml = pageHtml.replace(
-      /<meta\s+property="og:image"\s+content=".*?"\s*\/?>/i,
-      `<meta property="og:image" content="${ogImageUrl}" />`
-    );
+    // Replace Twitter Card tags
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:card', 'summary_large_image');
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:title', twitterTitle);
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:description', twitterDescription);
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:image', ogImageUrl);
+
+    // Replace Geo Meta Tags for local SEO
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'geo.region', 'KR-11');
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'geo.placename', 'Yeoksam-dong, Gangnam-gu, Seoul');
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'geo.position', '37.5029;127.0425');
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'ICBM', '37.5029, 127.0425');
 
     // Replace Root div with pre-rendered app content
     pageHtml = pageHtml.replace(
@@ -199,12 +268,25 @@ console.log(`  ✓ Total URLs in sitemap: ${allRoutePaths.length}`);
 // Automated Strict Validation (Fails build if any legacy domain or defect found)
 // ============================================================================
 console.log(`\n======================================================`);
-console.log(`[Audit & Validation] Running automated domain & SEO verification...`);
+console.log(`[Audit & Validation] Running automated domain, OG, and SEO verification...`);
 console.log(`======================================================`);
 
 const validationErrors: string[] = [];
 
-// 1. Audit sitemap.xml
+// 1. Audit representative image file existence and size
+const distOgJpgPath = path.join(distDir, 'images/og-image.jpg');
+if (!fs.existsSync(distOgJpgPath)) {
+  validationErrors.push(`[OG Image Error] ${distOgJpgPath} does not exist in build output!`);
+} else {
+  const stat = fs.statSync(distOgJpgPath);
+  const sizeKb = stat.size / 1024;
+  console.log(`  ✓ dist/images/og-image.jpg verified (${sizeKb.toFixed(1)} KB)`);
+  if (stat.size > 1024 * 1024) {
+    validationErrors.push(`[OG Image Error] og-image.jpg is too large (${sizeKb.toFixed(1)} KB > 1024 KB)!`);
+  }
+}
+
+// 2. Audit sitemap.xml
 const sitemapContent = fs.readFileSync(distSitemapPath, 'utf-8');
 for (const legacy of LEGACY_DOMAINS) {
   if (sitemapContent.includes(legacy)) {
@@ -223,7 +305,7 @@ for (const loc of locMatches) {
   }
 }
 
-// 2. Audit robots.txt
+// 3. Audit robots.txt
 const distRobotsPath = path.join(distDir, 'robots.txt');
 if (fs.existsSync(distRobotsPath)) {
   const robotsContent = fs.readFileSync(distRobotsPath, 'utf-8');
@@ -239,7 +321,7 @@ if (fs.existsSync(distRobotsPath)) {
   validationErrors.push(`[robots.txt Error] dist/robots.txt not found`);
 }
 
-// 3. Audit llms.txt
+// 4. Audit llms.txt
 const distLlmsPath = path.join(distDir, 'llms.txt');
 if (fs.existsSync(distLlmsPath)) {
   const llmsContent = fs.readFileSync(distLlmsPath, 'utf-8');
@@ -253,7 +335,7 @@ if (fs.existsSync(distLlmsPath)) {
   }
 }
 
-// 4. Audit all generated HTML files in dist/
+// 5. Audit all generated HTML files in dist/
 function getAllHtmlFiles(dir: string, fileList: string[] = []): string[] {
   const files = fs.readdirSync(dir);
   for (const file of files) {
@@ -269,17 +351,22 @@ function getAllHtmlFiles(dir: string, fileList: string[] = []): string[] {
 }
 
 const allHtmlFiles = getAllHtmlFiles(distDir);
-console.log(`[Audit] Scanning ${allHtmlFiles.length} generated HTML files in dist/ for legacy domains and canonical validity...`);
+console.log(`[Audit] Scanning ${allHtmlFiles.length} generated HTML files in dist/ for legacy domains, OG and SEO completeness...`);
 
 for (const htmlFile of allHtmlFiles) {
   const relPath = path.relative(distDir, htmlFile);
   const content = fs.readFileSync(htmlFile, 'utf-8');
 
-  // Check for forbidden legacy domains
+  // Check for forbidden legacy domains anywhere in HTML
   for (const legacy of LEGACY_DOMAINS) {
     if (content.includes(legacy)) {
       validationErrors.push(`[HTML Error in ${relPath}] Forbidden legacy domain '${legacy}' detected in page content!`);
     }
+  }
+
+  // Check for forbidden legacy contact info
+  if (content.includes('1566-8163')) {
+    validationErrors.push(`[HTML Error in ${relPath}] Forbidden legacy telephone '1566-8163' detected!`);
   }
 
   // Check canonical link
@@ -290,26 +377,101 @@ for (const htmlFile of allHtmlFiles) {
     validationErrors.push(`[HTML Error in ${relPath}] Canonical href '${canonicalMatch[1]}' does not start with '${SITE_URL}'!`);
   }
 
-  // Check OpenGraph URL
+  // Check OpenGraph Tags
+  const ogTitleMatch = content.match(/<meta\s+property="og:title"\s+content="(.*?)"/i);
+  if (!ogTitleMatch || !ogTitleMatch[1].trim()) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing or empty <meta property="og:title">`);
+  }
+
+  const ogDescMatch = content.match(/<meta\s+property="og:description"\s+content="(.*?)"/i);
+  if (!ogDescMatch || !ogDescMatch[1].trim()) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing or empty <meta property="og:description">`);
+  }
+
   const ogUrlMatch = content.match(/<meta\s+property="og:url"\s+content="(.*?)"/i);
   if (!ogUrlMatch) {
-    validationErrors.push(`[HTML Error in ${relPath}] Missing <meta property="og:url"> tag!`);
+    validationErrors.push(`[OG Error in ${relPath}] Missing <meta property="og:url"> tag!`);
   } else if (!ogUrlMatch[1].startsWith(SITE_URL)) {
-    validationErrors.push(`[HTML Error in ${relPath}] og:url content '${ogUrlMatch[1]}' does not start with '${SITE_URL}'!`);
+    validationErrors.push(`[OG Error in ${relPath}] og:url content '${ogUrlMatch[1]}' does not start with '${SITE_URL}'!`);
+  } else if (canonicalMatch && ogUrlMatch[1] !== canonicalMatch[1]) {
+    validationErrors.push(`[OG Error in ${relPath}] og:url ('${ogUrlMatch[1]}') does not match canonical ('${canonicalMatch[1]}')!`);
+  }
+
+  const ogSiteNameMatch = content.match(/<meta\s+property="og:site_name"\s+content="(.*?)"/i);
+  if (!ogSiteNameMatch) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing <meta property="og:site_name">`);
+  }
+
+  // Check OpenGraph Image and ensure no duplicates
+  const ogImageMatches = [...content.matchAll(/<meta\s+property="og:image"\s+content="(.*?)"/gi)];
+  if (ogImageMatches.length === 0) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing <meta property="og:image"> tag!`);
+  } else if (ogImageMatches.length > 1) {
+    validationErrors.push(`[OG Error in ${relPath}] Duplicate <meta property="og:image"> detected (${ogImageMatches.length} tags)!`);
+  } else {
+    const ogImgUrl = ogImageMatches[0][1];
+    if (!ogImgUrl.startsWith(SITE_URL)) {
+      validationErrors.push(`[OG Error in ${relPath}] og:image '${ogImgUrl}' does not start with '${SITE_URL}'!`);
+    }
+  }
+
+  const ogWidthMatch = content.match(/<meta\s+property="og:image:width"\s+content="1200"/i);
+  if (!ogWidthMatch) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing or invalid <meta property="og:image:width" content="1200">`);
+  }
+
+  const ogHeightMatch = content.match(/<meta\s+property="og:image:height"\s+content="630"/i);
+  if (!ogHeightMatch) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing or invalid <meta property="og:image:height" content="630">`);
+  }
+
+  const ogTypeImgMatch = content.match(/<meta\s+property="og:image:type"\s+content="image\/jpeg"/i);
+  if (!ogTypeImgMatch) {
+    validationErrors.push(`[OG Error in ${relPath}] Missing or invalid <meta property="og:image:type" content="image/jpeg">`);
+  }
+
+  // Check Twitter Cards
+  const twCardMatch = content.match(/<meta\s+name="twitter:card"\s+content="summary_large_image"/i);
+  if (!twCardMatch) {
+    validationErrors.push(`[Twitter Error in ${relPath}] Missing <meta name="twitter:card" content="summary_large_image">`);
+  }
+
+  const twTitleMatch = content.match(/<meta\s+name="twitter:title"\s+content="(.*?)"/i);
+  if (!twTitleMatch || !twTitleMatch[1].trim()) {
+    validationErrors.push(`[Twitter Error in ${relPath}] Missing or empty <meta name="twitter:title">`);
+  }
+
+  const twDescMatch = content.match(/<meta\s+name="twitter:description"\s+content="(.*?)"/i);
+  if (!twDescMatch || !twDescMatch[1].trim()) {
+    validationErrors.push(`[Twitter Error in ${relPath}] Missing or empty <meta name="twitter:description">`);
+  }
+
+  const twImageMatches = [...content.matchAll(/<meta\s+name="twitter:image"\s+content="(.*?)"/gi)];
+  if (twImageMatches.length === 0) {
+    validationErrors.push(`[Twitter Error in ${relPath}] Missing <meta name="twitter:image">`);
+  } else if (twImageMatches.length > 1) {
+    validationErrors.push(`[Twitter Error in ${relPath}] Duplicate <meta name="twitter:image"> detected (${twImageMatches.length} tags)!`);
+  } else {
+    const twImgUrl = twImageMatches[0][1];
+    if (!twImgUrl.startsWith(SITE_URL)) {
+      validationErrors.push(`[Twitter Error in ${relPath}] twitter:image '${twImgUrl}' does not start with '${SITE_URL}'!`);
+    }
   }
 }
 
-// 5. Final validation verdict
+// 6. Final validation verdict
 if (validationErrors.length > 0) {
-  console.error(`\n❌ [BUILD FAILURE] ${validationErrors.length} domain or SEO integrity error(s) detected:`);
+  console.error(`\n❌ [BUILD FAILURE] ${validationErrors.length} domain, OG, or SEO integrity error(s) detected:`);
   validationErrors.forEach((err, idx) => {
     console.error(`  ${idx + 1}. ${err}`);
   });
   console.error(`\nAborting build. Please resolve the above issues before deployment.`);
   process.exit(1);
 } else {
-  console.log(`\n✅ [Audit Passed] All ${allRoutePaths.length} routes, sitemap.xml, robots.txt, llms.txt, and ${allHtmlFiles.length} HTML files passed domain verification!`);
-  console.log(`✅ Official Domain: ${SITE_URL}`);
-  console.log(`✅ Zero legacy domains found.`);
+  console.log(`\n✅ [Audit Passed] All ${allRoutePaths.length} routes, sitemap.xml, robots.txt, llms.txt, and ${allHtmlFiles.length} HTML files passed strict verification!`);
+  console.log(`✅ Official Canonical Domain: ${SITE_URL}`);
+  console.log(`✅ Official OG Image: ${DEFAULT_OG_IMAGE} (1200x630, image/jpeg)`);
+  console.log(`✅ Twitter Card: summary_large_image configured across all static pages`);
+  console.log(`✅ Zero duplicate OG tags, zero legacy domains found.`);
   console.log(`======================================================\n`);
 }

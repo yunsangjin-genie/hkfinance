@@ -17,6 +17,11 @@ export const LEGACY_DOMAINS = [
   [_legacyPrefix + '-mokdong', 'co', 'kr'].join('.'),
 ] as const;
 
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-image.jpg`;
+export const DEFAULT_OG_IMAGE_WIDTH = 1200;
+export const DEFAULT_OG_IMAGE_HEIGHT = 630;
+export const DEFAULT_OG_IMAGE_TYPE = 'image/jpeg';
+
 export const SITE_CONFIG = {
   domain: SITE_DOMAIN,
   baseUrl: SITE_URL,
@@ -26,12 +31,15 @@ export const SITE_CONFIG = {
   leaderName: '윤상진',
   leaderTitle: '지점장',
   phone: '010-2627-8554',
-  tel: '1566-8163',
+  tel: '070-8252-9712',
   fax: '0504-441-8554',
   email: 'genie.yoon@gmail.com',
-  address: '서울특별시 양천구 목동',
-  defaultOgImage: `${SITE_URL}/og-image.png`,
-  defaultLogoImage: `${SITE_URL}/logo.png`,
+  address: '강남구 역삼동 708-33 파라다이스 밴처타워 6층',
+  defaultOgImage: DEFAULT_OG_IMAGE,
+  defaultLogoImage: `${SITE_URL}/hk-logo.svg`,
+  ogImageWidth: DEFAULT_OG_IMAGE_WIDTH,
+  ogImageHeight: DEFAULT_OG_IMAGE_HEIGHT,
+  ogImageType: DEFAULT_OG_IMAGE_TYPE,
 } as const;
 
 /**

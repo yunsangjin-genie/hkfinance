@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SITE_ROUTES, RouteMeta } from './routes';
 import { blogPosts } from '../data/blog';
-import { getCanonicalUrl } from '../config/site';
+import { getCanonicalUrl, DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_WIDTH, DEFAULT_OG_IMAGE_HEIGHT, DEFAULT_OG_IMAGE_TYPE } from '../config/site';
 
 // Normalize path to clean pathname (e.g., '/insurance/silson')
 export function normalizePath(rawPath: string): string {
@@ -116,15 +116,34 @@ export function useRouter(initialPath?: string) {
     const fullCanonical = getCanonicalUrl(meta.path);
     canonical.setAttribute('href', fullCanonical);
 
+    // Helper to ensure meta tag exists and has value
+    const setMetaTag = (attributeName: string, attributeValue: string, content: string) => {
+      let el = document.querySelector(`meta[${attributeName}="${attributeValue}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute(attributeName, attributeValue);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
     // OpenGraph tags
-    const ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', meta.title);
+    const targetOgImage = meta.ogImage || DEFAULT_OG_IMAGE;
+    setMetaTag('property', 'og:type', 'website');
+    setMetaTag('property', 'og:site_name', 'HK금융파트너스 경인사업본부 목동지점');
+    setMetaTag('property', 'og:title', meta.title);
+    setMetaTag('property', 'og:description', meta.description);
+    setMetaTag('property', 'og:url', fullCanonical);
+    setMetaTag('property', 'og:image', targetOgImage);
+    setMetaTag('property', 'og:image:width', String(DEFAULT_OG_IMAGE_WIDTH));
+    setMetaTag('property', 'og:image:height', String(DEFAULT_OG_IMAGE_HEIGHT));
+    setMetaTag('property', 'og:image:type', DEFAULT_OG_IMAGE_TYPE);
 
-    const ogDesc = document.querySelector('meta[property="og:description"]');
-    if (ogDesc) ogDesc.setAttribute('content', meta.description);
-
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) ogUrl.setAttribute('content', fullCanonical);
+    // Twitter Card tags
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', meta.title);
+    setMetaTag('name', 'twitter:description', meta.description);
+    setMetaTag('name', 'twitter:image', targetOgImage);
   }, [meta]);
 
   return {

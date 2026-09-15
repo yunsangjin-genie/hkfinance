@@ -32,7 +32,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 지점
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 웹사이트 이용조건 및 면책 고지

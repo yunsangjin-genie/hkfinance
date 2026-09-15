@@ -108,14 +108,14 @@ export const InsuranceHubPage: React.FC<InsuranceHubPageProps> = ({
             보험상품 안내
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            생명보험, 건강보험, 실손보험, 암보험, 연금보험, 화재보험 등 고객 상황별 맞춤 비교 상담을 위한 보험 카테고리 안내입니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 특정 보험사에 편향되지 않고 30여 개 제휴 보험사의 상품 약관과 가성비를 공정하게 분석하여 보험 상담이 필요한 고객과 보험설계사를 시작하려는 분 모두에게 객관적인 가이드를 제공합니다.
+            생명보험, 건강보험, 실손보험, 암보험, 연금보험, 화재보험 등 고객 상황별 맞춤 비교 상담을 위한 보험 카테고리 안내입니다. HK금융파트너스 경인사업본부 목동지점은 특정 보험사에 편향되지 않고 30여 개 제휴 보험사의 상품 약관과 가성비를 공정하게 분석하여 보험 상담이 필요한 고객과 보험설계사를 시작하려는 분 모두에게 객관적인 가이드를 제공합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 보험상담
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 30여개 보험사 객관적 비교

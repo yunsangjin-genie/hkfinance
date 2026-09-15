@@ -234,7 +234,7 @@ export const BranchPage: React.FC<BranchPageProps> = ({
             </span>
             <h2 className="text-2xl font-bold text-slate-900">사무실 안내 및 오시는 길</h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              강남대로 중심지에 위치하여 대중교통 이용이 매우 편리하며, 서울 전역 및 수도권 고객 상담과 설계사 멘토링을 활발히 진행하고 있습니다.
+              서울 및 수도권 전역 고객 상담과 설계사 멘토링을 활발히 진행하고 있습니다.
             </p>
 
             <div className="space-y-3 text-xs text-slate-700 pt-2">
@@ -242,10 +242,7 @@ export const BranchPage: React.FC<BranchPageProps> = ({
                 <MapPin className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <div>
                   <strong className="block text-slate-900">사무실 주소</strong>
-                  <span>({companyInfo.zipCode || '06123'}) {companyInfo.address} {companyInfo.detailAddress}</span>
-                  <span className="text-[11px] text-slate-500 block mt-0.5">
-                    • 대중교통: 지하철 2호선 / 신분당선 강남역 11번 출구 도보 5분, 9호선 신논현역 6번 출구 도보 3분
-                  </span>
+                  <span>{companyInfo.address} {companyInfo.detailAddress}</span>
                 </div>
               </div>
 
@@ -264,8 +261,8 @@ export const BranchPage: React.FC<BranchPageProps> = ({
                   <Building className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <strong className="block text-slate-900">대표 전화 (T.)</strong>
-                    <a href={`tel:${companyInfo.tel || '1566-8163'}`} className="text-slate-800 hover:underline">
-                      {companyInfo.tel || '1566-8163'}
+                    <a href={`tel:${companyInfo.tel || '070-8252-9712'}`} className="text-slate-800 hover:underline">
+                      {companyInfo.tel || '070-8252-9712'}
                     </a>
                   </div>
                 </div>
@@ -331,7 +328,9 @@ export const BranchPage: React.FC<BranchPageProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <span>사무실 대표 전화:</span>
-                <span className="text-slate-300 font-medium">{companyInfo.tel || '1566-8163'}</span>
+                <a href={`tel:${companyInfo.tel || '070-8252-9712'}`} className="text-slate-300 font-medium hover:text-white hover:underline">
+                  {companyInfo.tel || '070-8252-9712'}
+                </a>
               </div>
             </div>
           </div>

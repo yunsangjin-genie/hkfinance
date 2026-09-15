@@ -157,14 +157,14 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
             보험 상담 신청
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            궁금한 보험 내용을 접수해 주시면 전문 상담팀이 상황에 맞는 맞춤 상담을 안전하게 진행합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 금융소비자보호법을 준수하며 가입 강요 없이 고객의 권익을 최우선으로 보호합니다.
+            궁금한 보험 내용을 접수해 주시면 전문 상담팀이 상황에 맞는 맞춤 상담을 안전하게 진행합니다. HK금융파트너스 경인사업본부 목동지점은 금융소비자보호법을 준수하며 가입 강요 없이 고객의 권익을 최우선으로 보호합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 보험상담
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 1:1 맞춤 비교상담 접수

@@ -45,7 +45,7 @@ export const ManagerPage: React.FC<ManagerPageProps> = ({
               WHO: 지점장 {companyInfo.leaderName} (HK금융파트너스)
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 지점
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 정직한 상담 철학 & 1:1 직통 멘토링

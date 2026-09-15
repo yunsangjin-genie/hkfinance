@@ -92,14 +92,14 @@ export const RecruitProcessPage: React.FC<RecruitProcessPageProps> = ({
             설계사 지원 프로세스
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            지원 상담부터 자격시험 준비, 기초 입문 교육, 실습, 현장 동행, 전문 설계사 안착까지 6단계 로드맵을 안내합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 초보자도 안심하고 성장할 수 있는 실질적인 지원 체계를 갖추고 있습니다. 보험 상담이 필요한 고객에게 정직한 설계를 전달할 설계사 지망생을 환영합니다.
+            지원 상담부터 자격시험 준비, 기초 입문 교육, 실습, 현장 동행, 전문 설계사 안착까지 6단계 로드맵을 안내합니다. HK금융파트너스 경인사업본부 목동지점은 초보자도 안심하고 성장할 수 있는 실질적인 지원 체계를 갖추고 있습니다. 보험 상담이 필요한 고객에게 정직한 설계를 전달할 설계사 지망생을 환영합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-indigo-300">
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
-              WHERE: 서울 목동 지점
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHAT: 6단계 안착 로드맵

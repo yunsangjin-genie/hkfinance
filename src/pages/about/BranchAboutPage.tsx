@@ -38,14 +38,14 @@ export const BranchAboutPage: React.FC<BranchAboutPageProps> = ({
             지점 소개
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            고객에게는 신뢰를, 설계사에게는 성장의 기회를 제공하는 금융 컨설팅 전문 조직입니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 30여 개 제휴 보험사의 객관적 상품 분석과 가입 강요 없는 1:1 맞춤 보장설계를 지향합니다.
+            고객에게는 신뢰를, 설계사에게는 성장의 기회를 제공하는 금융 컨설팅 전문 조직입니다. HK금융파트너스 경인사업본부 목동지점은 30여 개 제휴 보험사의 객관적 상품 분석과 가입 강요 없는 1:1 맞춤 보장설계를 지향합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 양천구 목동
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 객관적 비교분석 & 정착 인프라

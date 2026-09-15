@@ -21,10 +21,10 @@ export const DigitalBusinessCard: React.FC<DigitalBusinessCardProps> = ({
     const text = `[HK금융파트너스 ${companyInfo.division} ${companyInfo.branch}]
 지점장/팀장 ${companyInfo.leaderName}
 • 직통 휴대전화: ${companyInfo.mobile || companyInfo.phone}
-• 대표번호: ${companyInfo.tel || '1566-8163'}
+• 대표번호: ${companyInfo.tel || '070-8252-9712'}
 • 팩스: ${companyInfo.fax || '0504-441-8554'}
 • 이메일: ${companyInfo.email}
-• 주소: (${companyInfo.zipCode || '06123'}) ${companyInfo.address} ${companyInfo.detailAddress}`;
+• 주소: ${companyInfo.address} ${companyInfo.detailAddress}`;
 
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
@@ -40,10 +40,10 @@ FN:윤상진
 ORG:HK금융파트너스;경인사업본부 목동지점
 TITLE:지점장 / 팀장
 TEL;TYPE=CELL:${companyInfo.mobile || '010-2627-8554'}
-TEL;TYPE=WORK:${companyInfo.tel || '1566-8163'}
+TEL;TYPE=WORK:${companyInfo.tel || '070-8252-9712'}
 TEL;TYPE=FAX:${companyInfo.fax || '0504-441-8554'}
 EMAIL;TYPE=INTERNET,WORK:${companyInfo.email || 'genie.yoon@gmail.com'}
-ADR;TYPE=WORK:;;${companyInfo.address} ${companyInfo.detailAddress};서울;;${companyInfo.zipCode || '07997'};대한민국
+ADR;TYPE=WORK:;;${companyInfo.address} ${companyInfo.detailAddress};서울;;;대한민국
 NOTE:HK금융파트너스 고객 맞춤 보장분석 및 보험설계사 멘토링
 URL:${SITE_URL}
 END:VCARD`;
@@ -102,16 +102,15 @@ END:VCARD`;
           <div className="flex items-start gap-2">
             <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
             <span className="leading-snug">
-              <strong className="text-slate-900 font-mono">[{companyInfo.zipCode || '06123'}]</strong> {companyInfo.address} {companyInfo.detailAddress}
-              <span className="text-[11px] text-slate-500 block">(지하철 2호선·신분당선 강남역 및 신논현역 인근)</span>
+              {companyInfo.address} {companyInfo.detailAddress}
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-mono text-[11px] sm:text-xs">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-slate-900">T.</span>
-              <a href={`tel:${companyInfo.tel || '1566-8163'}`} className="hover:text-blue-700 hover:underline">
-                {companyInfo.tel || '1566-8163'}
+              <a href={`tel:${companyInfo.tel || '070-8252-9712'}`} className="hover:text-blue-700 hover:underline">
+                {companyInfo.tel || '070-8252-9712'}
               </a>
             </div>
             <div className="flex items-center gap-1.5">

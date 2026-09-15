@@ -32,14 +32,14 @@ export const ConsultingHubPage: React.FC<ConsultingHubPageProps> = ({
             목동 보험상담
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            가입 권유 없이 현재 가입된 보험의 중복과 공백을 5단계로 투명하게 점검해 드립니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 보장분석부터 최적안 비교 및 지속적인 사후 관리까지 책임 있는 1:1 맞춤 상담을 제공합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 신뢰의 기준을 세워갑니다.
+            가입 권유 없이 현재 가입된 보험의 중복과 공백을 5단계로 투명하게 점검해 드립니다. HK금융파트너스 경인사업본부 목동지점은 보장분석부터 최적안 비교 및 지속적인 사후 관리까지 책임 있는 1:1 맞춤 상담을 제공합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 신뢰의 기준을 세워갑니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
-              WHERE: 서울 목동 보험상담
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
               WHAT: 5단계 투명 보장분석

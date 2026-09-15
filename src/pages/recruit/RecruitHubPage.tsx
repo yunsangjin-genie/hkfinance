@@ -81,14 +81,14 @@ export const RecruitHubPage: React.FC<RecruitHubPageProps> = ({
             보험설계사 지원
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            보험설계사를 처음 시작하는 분들이 고립되지 않고 안정적으로 정착할 수 있도록 체계적인 육성을 지원합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 자격시험 비용 지원부터 기초 입문 교육, 30여 개 보험사 1:1 비교설계 실무, 베테랑 선배의 현장 상담 동행까지 4대 정착 시스템을 완비하고 있습니다. 보험 상담이 필요한 고객에게 신뢰를 전할 예비 금융 전문가의 도전을 응원합니다.
+            보험설계사를 처음 시작하는 분들이 고립되지 않고 안정적으로 정착할 수 있도록 체계적인 육성을 지원합니다. HK금융파트너스 경인사업본부 목동지점은 자격시험 비용 지원부터 기초 입문 교육, 30여 개 보험사 1:1 비교설계 실무, 베테랑 선배의 현장 상담 동행까지 4대 정착 시스템을 완비하고 있습니다. 보험 상담이 필요한 고객에게 신뢰를 전할 예비 금융 전문가의 도전을 응원합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-indigo-300">
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
-              WHERE: 서울 목동 설계사 지원센터
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHAT: 시험지원·실무교육·현장동행

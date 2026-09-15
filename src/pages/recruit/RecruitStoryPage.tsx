@@ -80,14 +80,14 @@ export const RecruitStoryPage: React.FC<RecruitStoryPageProps> = ({
             설계사 시작 가이드
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            보험설계사를 시작하려는 분들이 가장 궁금해하는 시험 준비, 교육 기간, 실무 현장에 대한 솔직한 실무 Q&A를 안내합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 투명하고 정직한 정보로 새로운 금융 커리어의 첫걸음을 돕습니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 진솔한 지침서입니다.
+            보험설계사를 시작하려는 분들이 가장 궁금해하는 시험 준비, 교육 기간, 실무 현장에 대한 솔직한 실무 Q&A를 안내합니다. HK금융파트너스 경인사업본부 목동지점은 투명하고 정직한 정보로 새로운 금융 커리어의 첫걸음을 돕습니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 진솔한 지침서입니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-indigo-300">
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHO: HK금융파트너스 목동지점
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
-              WHERE: 서울 목동 지점
+              WHERE: 강남구 역삼동 708-33 파라다이스 밴처타워 6층
             </span>
             <span className="bg-indigo-950/70 px-2.5 py-1 rounded-md border border-indigo-800/60 font-medium">
               WHAT: 실무 현실 Q&A & 정착 노하우
