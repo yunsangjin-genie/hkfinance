@@ -14,6 +14,7 @@ import {
   DEFAULT_OG_IMAGE_WIDTH,
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_TYPE,
+  NAVER_SITE_VERIFICATION,
 } from '../src/config/site';
 import { generateOgImage } from './generate-og-image';
 
@@ -182,6 +183,9 @@ for (const routePath of allRoutePaths) {
     pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:title', twitterTitle);
     pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:description', twitterDescription);
     pageHtml = upsertMetaTag(pageHtml, 'name', 'twitter:image', ogImageUrl);
+
+    // Replace Naver Search Advisor Verification tag
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'naver-site-verification', NAVER_SITE_VERIFICATION);
 
     // Replace Geo Meta Tags for local SEO
     pageHtml = upsertMetaTag(pageHtml, 'name', 'geo.region', 'KR-11');
@@ -457,6 +461,24 @@ for (const htmlFile of allHtmlFiles) {
       validationErrors.push(`[Twitter Error in ${relPath}] twitter:image '${twImgUrl}' does not start with '${SITE_URL}'!`);
     }
   }
+
+  // Check Naver Search Advisor Verification tag
+  const naverMatches = [...content.matchAll(/<meta\s+name="naver-site-verification"\s+content="(.*?)"/gi)];
+  if (relPath === 'index.html') {
+    if (naverMatches.length === 0) {
+      validationErrors.push(`[Naver Verification Error] <meta name="naver-site-verification"> is missing in dist/index.html!`);
+    } else if (naverMatches.length > 1) {
+      validationErrors.push(`[Naver Verification Error] Duplicate <meta name="naver-site-verification"> detected (${naverMatches.length} tags) in dist/index.html!`);
+    } else if (naverMatches[0][1] !== NAVER_SITE_VERIFICATION) {
+      validationErrors.push(`[Naver Verification Error] naver-site-verification content '${naverMatches[0][1]}' does not match expected '${NAVER_SITE_VERIFICATION}'!`);
+    }
+  } else {
+    if (naverMatches.length > 1) {
+      validationErrors.push(`[Naver Verification Error in ${relPath}] Duplicate <meta name="naver-site-verification"> detected (${naverMatches.length} tags)!`);
+    } else if (naverMatches.length === 1 && naverMatches[0][1] !== NAVER_SITE_VERIFICATION) {
+      validationErrors.push(`[Naver Verification Error in ${relPath}] naver-site-verification content '${naverMatches[0][1]}' does not match expected '${NAVER_SITE_VERIFICATION}'!`);
+    }
+  }
 }
 
 // 6. Final validation verdict
@@ -472,6 +494,7 @@ if (validationErrors.length > 0) {
   console.log(`✅ Official Canonical Domain: ${SITE_URL}`);
   console.log(`✅ Official OG Image: ${DEFAULT_OG_IMAGE} (1200x630, image/jpeg)`);
   console.log(`✅ Twitter Card: summary_large_image configured across all static pages`);
-  console.log(`✅ Zero duplicate OG tags, zero legacy domains found.`);
+  console.log(`✅ Naver Search Advisor Verification: ${NAVER_SITE_VERIFICATION} confirmed in dist/index.html`);
+  console.log(`✅ Zero duplicate OG tags, zero duplicate verification tags, zero legacy domains found.`);
   console.log(`======================================================\n`);
 }

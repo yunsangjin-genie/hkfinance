@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SITE_ROUTES, RouteMeta } from './routes';
 import { blogPosts } from '../data/blog';
-import { getCanonicalUrl, DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_WIDTH, DEFAULT_OG_IMAGE_HEIGHT, DEFAULT_OG_IMAGE_TYPE } from '../config/site';
+import {
+  getCanonicalUrl,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_OG_IMAGE_WIDTH,
+  DEFAULT_OG_IMAGE_HEIGHT,
+  DEFAULT_OG_IMAGE_TYPE,
+  NAVER_SITE_VERIFICATION,
+} from '../config/site';
 
 // Normalize path to clean pathname (e.g., '/insurance/silson')
 export function normalizePath(rawPath: string): string {
@@ -144,6 +151,9 @@ export function useRouter(initialPath?: string) {
     setMetaTag('name', 'twitter:title', meta.title);
     setMetaTag('name', 'twitter:description', meta.description);
     setMetaTag('name', 'twitter:image', targetOgImage);
+
+    // Naver Search Advisor Verification tag
+    setMetaTag('name', 'naver-site-verification', NAVER_SITE_VERIFICATION);
   }, [meta]);
 
   return {

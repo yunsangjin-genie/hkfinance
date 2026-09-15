@@ -22,6 +22,8 @@ export const DEFAULT_OG_IMAGE_WIDTH = 1200;
 export const DEFAULT_OG_IMAGE_HEIGHT = 630;
 export const DEFAULT_OG_IMAGE_TYPE = 'image/jpeg';
 
+export const NAVER_SITE_VERIFICATION = 'ff2e8d780a40336ec093ea8328ad7f13f8be9b18';
+
 export const SITE_CONFIG = {
   domain: SITE_DOMAIN,
   baseUrl: SITE_URL,
@@ -40,6 +42,7 @@ export const SITE_CONFIG = {
   ogImageWidth: DEFAULT_OG_IMAGE_WIDTH,
   ogImageHeight: DEFAULT_OG_IMAGE_HEIGHT,
   ogImageType: DEFAULT_OG_IMAGE_TYPE,
+  naverSiteVerification: NAVER_SITE_VERIFICATION,
 } as const;
 
 /**
