@@ -7,11 +7,13 @@ import {
   Clock,
   Lock,
   ArrowRight,
-  Sparkles,
   RotateCcw,
+  AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { CompanyInfo } from '../../types';
 import { Breadcrumb } from '../../components/common/Breadcrumb';
+import { getCanonicalUrl } from '../../config/site';
 
 interface ConsultationFormPageProps {
   companyInfo: CompanyInfo;
@@ -28,72 +30,109 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
     name: '',
     phone: '',
     category: defaultCategory,
-    timePreference: '오후 (13:00 ~ 18:00)',
+    preferredTime: '오후 2시',
     message: '',
     privacyAgreed: true,
+    hp_website: '', // Honeypot spam defense
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [referenceId, setReferenceId] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const categories = [
-    '보험 전체 점검 및 보장분석',
-    '실손의료보험 (실비 전환 등)',
-    '종합 건강보험 (수술·입원비)',
-    '암·뇌·심장 3대질병 보험',
-    '종신 및 정기보험 (사망 보장)',
-    '연금 및 노후 준비 보험',
-    '화재 및 재산종합보험',
-    '기타 맞춤 문의',
+    '보험 전체 점검',
+    '보장분석',
+    '실손보험',
+    '건강보험',
+    '암보험',
+    '종신보험',
+    '연금·노후',
+    '화재·재산보험',
+    '기타',
   ];
 
   const timeOptions = [
     '오전 (09:00 ~ 12:00)',
+    '오후 2시',
     '오후 (13:00 ~ 18:00)',
     '야간 (18:00 ~ 21:00, 사전예약)',
     '주말 상담 희망 (사전협의)',
+    '상관없음 (빠른 상담 희망)',
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.phone.trim()) {
-      alert('성함과 연락처를 입력해 주세요.');
+    setErrorMessage(null);
+
+    const trimmedName = formData.name.trim();
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMessage('성함을 2자 이상 입력해 주세요.');
       return;
     }
+
+    if (cleanPhone.length < 9 || cleanPhone.length > 12) {
+      setErrorMessage('연락처를 올바른 전화번호 형식으로 입력해 주세요 (예: 010-1234-5678).');
+      return;
+    }
+
     if (!formData.privacyAgreed) {
-      alert('개인정보 수집 및 이용에 동의해 주세요.');
+      setErrorMessage('개인정보 수집 및 이용에 동의하셔야 상담 접수가 가능합니다.');
       return;
     }
 
-    const ref = 'HK-' + Math.floor(100000 + Math.random() * 900000);
-    setReferenceId(ref);
+    setIsSubmitting(true);
 
-    // Save inquiry to localStorage for branch records
-    const newInquiry = {
-      id: ref,
-      date: new Date().toISOString(),
-      ...formData,
-    };
     try {
-      const existing = JSON.parse(localStorage.getItem('hk_consult_inquiries') || '[]');
-      localStorage.setItem('hk_consult_inquiries', JSON.stringify([newInquiry, ...existing]));
-    } catch {
-      // fallback
-    }
+      const res = await fetch('/api/consultation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'insurance-consultation',
+          name: trimmedName,
+          phone: formData.phone.trim(),
+          category: formData.category,
+          preferredTime: formData.preferredTime,
+          message: formData.message.trim(),
+          privacyAgreed: formData.privacyAgreed,
+          hp_website: formData.hp_website,
+          sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/consulting/consultation'),
+        }),
+      });
 
-    setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success) {
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        setErrorMessage(
+          data?.message || '상담 신청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'
+        );
+      }
+    } catch (err) {
+      console.error('[Consultation Submit Error]', err);
+      setErrorMessage('상담 신청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
     setSubmitted(false);
+    setErrorMessage(null);
     setFormData({
       name: '',
       phone: '',
-      category: '보험 전체 점검 및 보장분석',
-      timePreference: '오후 (13:00 ~ 18:00)',
+      category: '보험 전체 점검',
+      preferredTime: '오후 2시',
       message: '',
       privacyAgreed: true,
+      hp_website: '',
     });
   };
 
@@ -118,7 +157,7 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
             보험 상담 신청
           </h1>
           <p className="text-sm sm:text-base text-slate-200 max-w-3xl mx-auto leading-relaxed font-normal">
-            궁금한 보험 내용을 접수해 주시면 전문 상담팀이 상황에 맞는 맞춤 상담을 안전하게 진행합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 금융소비자보호법을 준수하며 가입 강요 없이 고객의 권익을 최우선으로 보호합니다. 보험 상담이 필요한 고객과 보험설계사를 시작하려는 사람을 위한 열린 창구입니다.
+            궁금한 보험 내용을 접수해 주시면 전문 상담팀이 상황에 맞는 맞춤 상담을 안전하게 진행합니다. HK금융파트너스 경인사업본부 목동지점은 서울 목동을 기반으로 하는 보험 상담 지점으로서, 금융소비자보호법을 준수하며 가입 강요 없이 고객의 권익을 최우선으로 보호합니다.
           </p>
           <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs text-blue-300">
             <span className="bg-blue-950/70 px-2.5 py-1 rounded-md border border-blue-800/60 font-medium">
@@ -147,14 +186,16 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
 
             <div className="space-y-2">
               <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full">
-                접수 번호: {referenceId}
+                접수 완료
               </span>
               <h2 className="text-2xl font-bold text-slate-900">
-                상담 신청이 정상적으로 접수되었습니다.
+                상담 신청이 접수되었습니다.
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                신청해 주신 내용은 <strong>{companyInfo.fullName}</strong> 상담팀에 안전하게 전달되었습니다.
-                희망하신 시간대에 맞춰 정성을 다해 안내해 드리겠습니다.
+              <p className="text-sm sm:text-base text-slate-700 max-w-md mx-auto leading-relaxed font-medium">
+                확인 후 상담을 위해 연락드리겠습니다.
+              </p>
+              <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                신청하신 내용은 {companyInfo.fullName} 윤상진 지점장 및 전담팀에 안전하게 전달되었습니다.
               </p>
             </div>
 
@@ -173,7 +214,7 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">희망 시간</span>
-                <span className="font-semibold text-slate-800">{formData.timePreference}</span>
+                <span className="font-semibold text-slate-800">{formData.preferredTime}</span>
               </div>
             </div>
 
@@ -199,19 +240,42 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
             <div className="border-b border-slate-100 pb-4">
               <h2 className="text-xl font-bold text-slate-900">상담 신청서 작성</h2>
               <p className="text-xs text-slate-500 mt-1">
-                작성하신 정보는 오직 상담 배정 및 본인 연락 목적으로만 안전하게 사용됩니다.
+                작성하신 정보는 오직 1:1 맞춤 상담 배정 및 본인 연락 목적으로만 안전하게 사용됩니다.
               </p>
             </div>
 
+            {/* Error Message Banner */}
+            {errorMessage && (
+              <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3 text-rose-700 text-xs sm:text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0 text-rose-600" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Honeypot hidden input for spam defense */}
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="hp_website">웹사이트</label>
+                <input
+                  type="text"
+                  id="hp_website"
+                  name="hp_website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.hp_website}
+                  onChange={(e) => setFormData({ ...formData, hp_website: e.target.value })}
+                />
+              </div>
+
               {/* Name & Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
-                    <span>성함</span>
+                  <label htmlFor="client-name" className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                    <span>이름</span>
                     <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    id="client-name"
                     type="text"
                     required
                     placeholder="홍길동"
@@ -222,11 +286,12 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1">
-                    <span>연락처 (휴대폰)</span>
+                  <label htmlFor="client-phone" className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                    <span>연락처</span>
                     <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    id="client-phone"
                     type="tel"
                     required
                     placeholder="010-0000-0000"
@@ -239,10 +304,12 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
 
               {/* Consultation Category */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-800">
-                  상담 희망 분야
+                <label htmlFor="consult-category" className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                  <span>상담 분야</span>
+                  <span className="text-rose-500">*</span>
                 </label>
                 <select
+                  id="consult-category"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-hidden focus:border-blue-500 transition cursor-pointer"
@@ -257,13 +324,14 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
 
               {/* Time Preference */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <label htmlFor="preferred-time" className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>연락 희망 시간대</span>
+                  <span>상담 희망 시간 (선택)</span>
                 </label>
                 <select
-                  value={formData.timePreference}
-                  onChange={(e) => setFormData({ ...formData, timePreference: e.target.value })}
+                  id="preferred-time"
+                  value={formData.preferredTime}
+                  onChange={(e) => setFormData({ ...formData, preferredTime: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-hidden focus:border-blue-500 transition cursor-pointer"
                 >
                   {timeOptions.map((opt) => (
@@ -276,12 +344,13 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
 
               {/* Message / Details */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-800">
-                  문의 내용 및 점검하고 싶은 사항 (선택)
+                <label htmlFor="client-message" className="text-xs font-bold text-slate-800">
+                  문의 내용 (선택)
                 </label>
                 <textarea
+                  id="client-message"
                   rows={4}
-                  placeholder="예: 실손보험 갱신 보험료가 너무 올라서 4세대로 바꾸는 게 좋은지 궁금합니다. / 기존에 가입한 암보험 진단비가 부족한지 확인하고 싶습니다."
+                  placeholder="예: 현재 가입한 실손보험을 점검받고 싶습니다. 갱신 보험료가 인상되어 4세대 전환 여부를 고민 중입니다."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-hidden focus:border-blue-500 transition resize-none"
@@ -289,28 +358,46 @@ export const ConsultationFormPage: React.FC<ConsultationFormPageProps> = ({
               </div>
 
               {/* Privacy Agreement */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-3">
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-3">
                 <input
                   type="checkbox"
                   id="privacy"
                   checked={formData.privacyAgreed}
                   onChange={(e) => setFormData({ ...formData, privacyAgreed: e.target.checked })}
-                  className="mt-0.5 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="mt-0.5 rounded-sm border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer w-4 h-4"
                 />
-                <label htmlFor="privacy" className="text-[11px] text-slate-600 leading-relaxed cursor-pointer">
+                <label htmlFor="privacy" className="text-[11px] text-slate-600 leading-relaxed cursor-pointer select-none">
                   <span className="font-semibold text-slate-800">[필수] 개인정보 수집 및 이용 동의</span>
                   <br />
-                  수집 항목: 성명, 연락처, 상담 내용 / 수집 목적: 보험 상담 신청 접수 및 답변 안내 / 보유 기간: 상담 종료 후 1년 또는 파기 요청 시까지 안전하게 보관 후 파기.
+                  수집 항목: 이름, 연락처, 상담 분야, 문의 내용, 상담 희망 시간 / 수집 목적: 1:1 맞춤 보험 상담 신청 접수 및 회신 / 보유 기간: 상담 완료 후 1년 또는 정보주체의 파기 요청 시까지 안전하게 보관 후 파기.
+                  <br />
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('/privacy')}
+                    className="text-blue-600 hover:underline font-medium inline-block mt-0.5 cursor-pointer"
+                  >
+                    개인정보처리방침 자세히 보기 &rarr;
+                  </button>
                 </label>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit Button with Anti-Double-Submit */}
               <button
                 type="submit"
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20"
+                disabled={isSubmitting}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-blue-600/20"
               >
-                <Send className="w-4 h-4" />
-                <span>무료 상담 신청하기</span>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>상담 신청서 전송 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>상담 신청하기</span>
+                  </>
+                )}
               </button>
             </form>
           </div>

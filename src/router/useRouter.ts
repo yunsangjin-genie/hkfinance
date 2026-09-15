@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SITE_ROUTES, RouteMeta } from './routes';
 import { blogPosts } from '../data/blog';
+import { getCanonicalUrl } from '../config/site';
 
 // Normalize path to clean pathname (e.g., '/insurance/silson')
 export function normalizePath(rawPath: string): string {
@@ -21,8 +22,9 @@ export function normalizePath(rawPath: string): string {
   return p || '/';
 }
 
-export function useRouter() {
+export function useRouter(initialPath?: string) {
   const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (initialPath) return normalizePath(initialPath);
     if (typeof window === 'undefined') return '/';
     // If hash routing is used
     if (window.location.hash && window.location.hash.length > 1) {
@@ -111,7 +113,7 @@ export function useRouter() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    const fullCanonical = `https://mokdong.hkfp.co.kr${meta.path === '/' ? '' : meta.path}`;
+    const fullCanonical = getCanonicalUrl(meta.path);
     canonical.setAttribute('href', fullCanonical);
 
     // OpenGraph tags

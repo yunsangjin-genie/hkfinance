@@ -4,6 +4,7 @@ import { faqItems } from '../../data/faqs';
 import { initialCompanyInfo } from '../../data/company';
 import { blogPosts } from '../../data/blog';
 import { SITE_ROUTES } from '../../router/routes';
+import { SITE_URL, getCanonicalUrl } from '../../config/site';
 
 interface StructuredDataProps {
   companyInfo?: CompanyInfo;
@@ -18,7 +19,7 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
   const schemaOrganization = {
     '@context': 'https://schema.org',
     '@type': 'FinancialService',
-    '@id': 'https://mokdong.hkfp.co.kr/#organization',
+    '@id': `${SITE_URL}/#organization`,
     name: company.fullName,
     alternateName: [
       'HK금융파트너스 목동지점',
@@ -26,8 +27,8 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
       '목동 보험상담',
       '윤상진 지점장',
     ],
-    url: 'https://mokdong.hkfp.co.kr/',
-    logo: 'https://mokdong.hkfp.co.kr/logo.png',
+    url: `${SITE_URL}/`,
+    logo: `${SITE_URL}/logo.png`,
     description: company.mainSlogan + ' ' + company.coreMessage,
     slogan: company.mainSlogan,
     address: {
@@ -77,7 +78,7 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
       '@type': 'ListItem',
       position: idx + 1,
       name: item.name,
-      item: item.path ? `https://mokdong.hkfp.co.kr${item.path}` : undefined,
+      item: item.path ? getCanonicalUrl(item.path) : undefined,
     })),
   };
 
@@ -118,7 +119,7 @@ export const StructuredData: React.FC<StructuredDataProps> = ({ companyInfo, cur
         },
         datePublished: post.publishDate.replace(/\./g, '-'),
         dateModified: post.updateDate ? post.updateDate.replace(/\./g, '-') : undefined,
-        mainEntityOfPage: `https://mokdong.hkfp.co.kr/insurance-info/${post.id}`,
+        mainEntityOfPage: getCanonicalUrl(`/insurance-info/${post.id}`),
       };
     }
   }

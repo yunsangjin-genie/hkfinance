@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Menu, X, ChevronDown, Phone, Briefcase, ArrowRight, ShieldCheck, Sparkles, User } from 'lucide-react';
 import { CompanyInfo } from '../../types';
 import { HKLogo } from '../common/HKLogo';
+import { MobileNavMenu } from './MobileNavMenu';
 
 interface HeaderProps {
   currentPath: string;
   onNavigate: (path: string) => void;
   onOpenConsult: (category?: string) => void;
   onOpenRecruit: () => void;
+  onOpenAdminConfig?: () => void;
   companyInfo: CompanyInfo;
 }
 
@@ -210,88 +212,27 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Mobile Menu Hamburger Toggle */}
           <div className="flex items-center space-x-2 lg:hidden">
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 text-slate-700 hover:text-slate-950 rounded-xl hover:bg-slate-100 transition cursor-pointer"
-              aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2.5 text-slate-700 hover:text-slate-950 rounded-xl hover:bg-slate-100 active:bg-slate-200 transition cursor-pointer border border-transparent hover:border-slate-200"
+              aria-label="모바일 메뉴 열기"
               aria-expanded={mobileMenuOpen}
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-6 h-6 stroke-[2.2]" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-[65px] bottom-0 bg-slate-900/60 backdrop-blur-xs z-50 flex flex-col justify-between">
-          <div className="bg-white border-b border-slate-200 px-5 py-6 max-h-[80vh] overflow-y-auto shadow-2xl space-y-5">
-            {/* Quick Mobile Action Buttons */}
-            <div className="grid grid-cols-2 gap-2.5 pb-3 border-b border-slate-100">
-              <button
-                onClick={() => handleLinkClick('/consulting/consultation')}
-                className="py-3 bg-blue-600 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>보험 상담</span>
-              </button>
-              <button
-                onClick={() => handleLinkClick('/recruit')}
-                className="py-3 bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs"
-              >
-                <Briefcase className="w-4 h-4 text-indigo-400" />
-                <span>설계사 지원</span>
-              </button>
-            </div>
-
-            {/* Navigation Category List */}
-            <div className="space-y-3">
-              {navItems.map((item) => {
-                const active = isNavActive(item);
-                return (
-                  <div key={item.path} className="border-b border-slate-100 pb-2">
-                    <button
-                      onClick={() => handleLinkClick(item.path)}
-                      className={`w-full text-left py-2 font-bold text-sm flex items-center justify-between cursor-pointer ${
-                        active ? 'text-blue-600' : 'text-slate-900'
-                      }`}
-                    >
-                      <span>{item.label}</span>
-                      <ArrowRight className="w-4 h-4 text-slate-400" />
-                    </button>
-
-                    {item.subItems && (
-                      <div className="pl-3 pr-1 py-1 space-y-1">
-                        {item.subItems.map((sub) => (
-                          <button
-                            key={sub.path}
-                            onClick={() => handleLinkClick(sub.path)}
-                            className={`w-full text-left py-1.5 text-xs rounded-md block cursor-pointer ${
-                              currentPath === sub.path
-                                ? 'text-blue-700 font-bold bg-blue-50 px-2'
-                                : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                          >
-                            {sub.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Branch Contact Quick Info */}
-            <div className="pt-2 text-xs text-slate-500 space-y-1 bg-slate-50 p-3 rounded-xl">
-              <p className="font-semibold text-slate-700">{companyInfo.fullName}</p>
-              <p>지점장 직통: {companyInfo.mobile}</p>
-              <p>상담시간: {companyInfo.consultHours}</p>
-            </div>
-          </div>
-
-          <div className="flex-1" onClick={() => setMobileMenuOpen(false)} />
-        </div>
-      )}
+      {/* Full-Screen Independent Mobile Navigation Overlay/Panel */}
+      <MobileNavMenu
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        currentPath={currentPath}
+        onNavigate={handleLinkClick}
+        companyInfo={companyInfo}
+        onOpenConsult={onOpenConsult}
+        onOpenRecruit={onOpenRecruit}
+      />
     </header>
   );
 };

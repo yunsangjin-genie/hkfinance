@@ -1,0 +1,315 @@
+import fs from 'fs';
+import path from 'path';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import App from '../src/App';
+import { SITE_ROUTES } from '../src/router/routes';
+import { blogPosts } from '../src/data/blog';
+import { SITE_URL, SITE_DOMAIN, LEGACY_DOMAINS, getCanonicalUrl } from '../src/config/site';
+
+// Target production dist directory
+const distDir = path.resolve(process.cwd(), 'dist');
+const templateHtmlPath = path.join(distDir, 'index.html');
+
+if (!fs.existsSync(templateHtmlPath)) {
+  console.error(`[SSG Error] template index.html not found in ${templateHtmlPath}. Run 'vite build' first.`);
+  process.exit(1);
+}
+
+const templateHtml = fs.readFileSync(templateHtmlPath, 'utf-8');
+
+// All predefined routes from SITE_ROUTES + dynamic blog detail pages
+const allRoutePaths = Object.keys(SITE_ROUTES);
+
+// Add dynamic blog posts routes
+blogPosts.forEach((post) => {
+  const postPath = `/insurance-info/${post.id}`;
+  if (!allRoutePaths.includes(postPath)) {
+    allRoutePaths.push(postPath);
+  }
+});
+
+console.log(`\n======================================================`);
+console.log(`[SSG] Starting Static Site Generation for ${allRoutePaths.length} routes...`);
+console.log(`[SSG] Canonical Base Domain: ${SITE_URL}`);
+console.log(`======================================================\n`);
+
+let generatedCount = 0;
+
+for (const routePath of allRoutePaths) {
+  try {
+    // 1. Render App component to static HTML string with routePath
+    const appHtml = renderToString(React.createElement(App, { initialPath: routePath }));
+
+    // 2. Fetch metadata for route
+    let meta = SITE_ROUTES[routePath];
+    if (!meta && routePath.startsWith('/insurance-info/')) {
+      const slug = routePath.replace('/insurance-info/', '');
+      const post = blogPosts.find((p) => p.id === slug);
+      if (post) {
+        meta = {
+          path: routePath,
+          title: `${post.title} | HK금융파트너스 목동지점`,
+          description: post.summary,
+          keywords: [post.category, ...post.tags].join(', '),
+          category: '보험정보',
+          ogImage: `${SITE_URL}/logo.png`,
+          breadcrumb: [
+            { name: '홈', path: '/' },
+            { name: '보험정보', path: '/insurance-info' },
+            { name: post.title },
+          ],
+        };
+      }
+    }
+
+    const title = meta?.title || 'HK금융파트너스 경인사업본부 목동지점 | 맞춤 보험상담 & 설계사 리크루팅';
+    const description =
+      meta?.description ||
+      'HK금융파트너스 경인사업본부 목동지점 공식 웹사이트. 1:1 객관적 보장분석, 실손·건강·암·종신보험 비교상담 및 설계사 정착 지원.';
+    const canonicalUrl = getCanonicalUrl(routePath);
+    const ogImageUrl = meta?.ogImage || `${SITE_URL}/og-image.png`;
+
+    // 3. Inject into HTML Template
+    let pageHtml = templateHtml;
+
+    // Replace Title
+    pageHtml = pageHtml.replace(/<title>.*?<\/title>/i, `<title>${title}</title>`);
+
+    // Replace Meta Description
+    if (pageHtml.includes('<meta name="description"')) {
+      pageHtml = pageHtml.replace(
+        /<meta\s+name="description"\s+content=".*?"\s*\/?>/i,
+        `<meta name="description" content="${description}" />`
+      );
+    } else {
+      pageHtml = pageHtml.replace(
+        '</head>',
+        `  <meta name="description" content="${description}" />\n</head>`
+      );
+    }
+
+    // Replace or Insert Canonical
+    if (pageHtml.includes('rel="canonical"')) {
+      pageHtml = pageHtml.replace(
+        /<link\s+rel="canonical"\s+href=".*?"\s*\/?>/i,
+        `<link rel="canonical" href="${canonicalUrl}" />`
+      );
+    } else {
+      pageHtml = pageHtml.replace(
+        '</head>',
+        `  <link rel="canonical" href="${canonicalUrl}" />\n</head>`
+      );
+    }
+
+    // Replace OpenGraph Title & Description & URL & Image
+    pageHtml = pageHtml.replace(
+      /<meta\s+property="og:title"\s+content=".*?"\s*\/?>/i,
+      `<meta property="og:title" content="${title}" />`
+    );
+    pageHtml = pageHtml.replace(
+      /<meta\s+property="og:description"\s+content=".*?"\s*\/?>/i,
+      `<meta property="og:description" content="${description}" />`
+    );
+    pageHtml = pageHtml.replace(
+      /<meta\s+property="og:url"\s+content=".*?"\s*\/?>/i,
+      `<meta property="og:url" content="${canonicalUrl}" />`
+    );
+    pageHtml = pageHtml.replace(
+      /<meta\s+property="og:image"\s+content=".*?"\s*\/?>/i,
+      `<meta property="og:image" content="${ogImageUrl}" />`
+    );
+
+    // Replace Root div with pre-rendered app content
+    pageHtml = pageHtml.replace(
+      /<div id="root"><\/div>/,
+      `<div id="root">${appHtml}</div>`
+    );
+
+    // 4. Save to filesystem
+    let targetFilePath: string;
+    if (routePath === '/' || routePath === '') {
+      targetFilePath = path.join(distDir, 'index.html');
+    } else {
+      const subDir = path.join(distDir, ...routePath.split('/').filter(Boolean));
+      if (!fs.existsSync(subDir)) {
+        fs.mkdirSync(subDir, { recursive: true });
+      }
+      targetFilePath = path.join(subDir, 'index.html');
+    }
+
+    fs.writeFileSync(targetFilePath, pageHtml, 'utf-8');
+    generatedCount++;
+    console.log(`  ✓ Generated: ${routePath} -> ${path.relative(distDir, targetFilePath)}`);
+  } catch (err) {
+    console.error(`  ✗ Error generating SSG for ${routePath}:`, err);
+    throw err;
+  }
+}
+
+console.log(`\n[SSG Complete] Successfully generated ${generatedCount}/${allRoutePaths.length} static HTML pages!`);
+
+// ============================================================================
+// Automatic Dynamic Sitemap Generation
+// ============================================================================
+console.log(`\n[Sitemap Generation] Creating dynamic sitemap.xml strictly using ${SITE_URL}...`);
+
+const todayDate = new Date().toISOString().split('T')[0];
+
+function getRoutePriority(p: string): { priority: string; changefreq: string } {
+  if (p === '/' || p === '') return { priority: '1.0', changefreq: 'daily' };
+  if (p.startsWith('/consulting')) return { priority: '0.95', changefreq: 'daily' };
+  if (p.startsWith('/insurance')) return { priority: '0.9', changefreq: 'weekly' };
+  if (p.startsWith('/recruit')) return { priority: '0.9', changefreq: 'weekly' };
+  if (p.startsWith('/insurance-info')) return { priority: '0.8', changefreq: 'weekly' };
+  if (p.startsWith('/about')) return { priority: '0.8', changefreq: 'monthly' };
+  if (p === '/faq' || p === '/contact') return { priority: '0.7', changefreq: 'monthly' };
+  return { priority: '0.5', changefreq: 'monthly' };
+}
+
+const sitemapEntries = allRoutePaths.map((routePath) => {
+  const locUrl = getCanonicalUrl(routePath);
+  const { priority, changefreq } = getRoutePriority(routePath);
+  return `  <url>
+    <loc>${locUrl}</loc>
+    <lastmod>${todayDate}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`;
+});
+
+const sitemapXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapEntries.join('\n')}
+</urlset>
+`;
+
+const distSitemapPath = path.join(distDir, 'sitemap.xml');
+fs.writeFileSync(distSitemapPath, sitemapXmlContent, 'utf-8');
+
+// Also sync to public/sitemap.xml so repository source remains up-to-date
+const publicSitemapPath = path.join(process.cwd(), 'public', 'sitemap.xml');
+fs.writeFileSync(publicSitemapPath, sitemapXmlContent, 'utf-8');
+
+console.log(`  ✓ Sitemap written to: ${distSitemapPath}`);
+console.log(`  ✓ Sitemap synced to: ${publicSitemapPath}`);
+console.log(`  ✓ Total URLs in sitemap: ${allRoutePaths.length}`);
+
+// ============================================================================
+// Automated Strict Validation (Fails build if any legacy domain or defect found)
+// ============================================================================
+console.log(`\n======================================================`);
+console.log(`[Audit & Validation] Running automated domain & SEO verification...`);
+console.log(`======================================================`);
+
+const validationErrors: string[] = [];
+
+// 1. Audit sitemap.xml
+const sitemapContent = fs.readFileSync(distSitemapPath, 'utf-8');
+for (const legacy of LEGACY_DOMAINS) {
+  if (sitemapContent.includes(legacy)) {
+    validationErrors.push(`[Sitemap Error] Forbidden legacy domain detected in sitemap.xml: '${legacy}'`);
+  }
+}
+
+const locMatches = [...sitemapContent.matchAll(/<loc>(.*?)<\/loc>/g)].map(m => m[1]);
+if (locMatches.length === 0) {
+  validationErrors.push(`[Sitemap Error] No <loc> entries found in sitemap.xml`);
+}
+
+for (const loc of locMatches) {
+  if (!loc.startsWith(`${SITE_URL}/`)) {
+    validationErrors.push(`[Sitemap Error] Invalid URL in sitemap: '${loc}'. Must start with '${SITE_URL}/'`);
+  }
+}
+
+// 2. Audit robots.txt
+const distRobotsPath = path.join(distDir, 'robots.txt');
+if (fs.existsSync(distRobotsPath)) {
+  const robotsContent = fs.readFileSync(distRobotsPath, 'utf-8');
+  for (const legacy of LEGACY_DOMAINS) {
+    if (robotsContent.includes(legacy)) {
+      validationErrors.push(`[robots.txt Error] Forbidden legacy domain detected in robots.txt: '${legacy}'`);
+    }
+  }
+  if (!robotsContent.includes(`Sitemap: ${SITE_URL}/sitemap.xml`)) {
+    validationErrors.push(`[robots.txt Error] Missing or incorrect Sitemap directive. Expected: Sitemap: ${SITE_URL}/sitemap.xml`);
+  }
+} else {
+  validationErrors.push(`[robots.txt Error] dist/robots.txt not found`);
+}
+
+// 3. Audit llms.txt
+const distLlmsPath = path.join(distDir, 'llms.txt');
+if (fs.existsSync(distLlmsPath)) {
+  const llmsContent = fs.readFileSync(distLlmsPath, 'utf-8');
+  for (const legacy of LEGACY_DOMAINS) {
+    if (llmsContent.includes(legacy)) {
+      validationErrors.push(`[llms.txt Error] Forbidden legacy domain detected in llms.txt: '${legacy}'`);
+    }
+  }
+  if (!llmsContent.includes(SITE_URL)) {
+    validationErrors.push(`[llms.txt Error] Missing canonical site URL in llms.txt: '${SITE_URL}'`);
+  }
+}
+
+// 4. Audit all generated HTML files in dist/
+function getAllHtmlFiles(dir: string, fileList: string[] = []): string[] {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat.isDirectory()) {
+      getAllHtmlFiles(filePath, fileList);
+    } else if (file.endsWith('.html')) {
+      fileList.push(filePath);
+    }
+  }
+  return fileList;
+}
+
+const allHtmlFiles = getAllHtmlFiles(distDir);
+console.log(`[Audit] Scanning ${allHtmlFiles.length} generated HTML files in dist/ for legacy domains and canonical validity...`);
+
+for (const htmlFile of allHtmlFiles) {
+  const relPath = path.relative(distDir, htmlFile);
+  const content = fs.readFileSync(htmlFile, 'utf-8');
+
+  // Check for forbidden legacy domains
+  for (const legacy of LEGACY_DOMAINS) {
+    if (content.includes(legacy)) {
+      validationErrors.push(`[HTML Error in ${relPath}] Forbidden legacy domain '${legacy}' detected in page content!`);
+    }
+  }
+
+  // Check canonical link
+  const canonicalMatch = content.match(/<link\s+rel="canonical"\s+href="(.*?)"/i);
+  if (!canonicalMatch) {
+    validationErrors.push(`[HTML Error in ${relPath}] Missing <link rel="canonical"> tag!`);
+  } else if (!canonicalMatch[1].startsWith(SITE_URL)) {
+    validationErrors.push(`[HTML Error in ${relPath}] Canonical href '${canonicalMatch[1]}' does not start with '${SITE_URL}'!`);
+  }
+
+  // Check OpenGraph URL
+  const ogUrlMatch = content.match(/<meta\s+property="og:url"\s+content="(.*?)"/i);
+  if (!ogUrlMatch) {
+    validationErrors.push(`[HTML Error in ${relPath}] Missing <meta property="og:url"> tag!`);
+  } else if (!ogUrlMatch[1].startsWith(SITE_URL)) {
+    validationErrors.push(`[HTML Error in ${relPath}] og:url content '${ogUrlMatch[1]}' does not start with '${SITE_URL}'!`);
+  }
+}
+
+// 5. Final validation verdict
+if (validationErrors.length > 0) {
+  console.error(`\n❌ [BUILD FAILURE] ${validationErrors.length} domain or SEO integrity error(s) detected:`);
+  validationErrors.forEach((err, idx) => {
+    console.error(`  ${idx + 1}. ${err}`);
+  });
+  console.error(`\nAborting build. Please resolve the above issues before deployment.`);
+  process.exit(1);
+} else {
+  console.log(`\n✅ [Audit Passed] All ${allRoutePaths.length} routes, sitemap.xml, robots.txt, llms.txt, and ${allHtmlFiles.length} HTML files passed domain verification!`);
+  console.log(`✅ Official Domain: ${SITE_URL}`);
+  console.log(`✅ Zero legacy domains found.`);
+  console.log(`======================================================\n`);
+}

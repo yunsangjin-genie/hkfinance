@@ -3,6 +3,7 @@ import { Briefcase, CheckCircle2, ArrowRight, Sparkles, Award, Users, BookOpen, 
 import { recruitmentBenefits, careerSteps, recruitKeyMessages } from '../data/recruitment';
 import { CompanyInfo } from '../types';
 import { siteImages } from '../assets/images';
+import { getCanonicalUrl } from '../config/site';
 
 interface RecruitmentPageProps {
   companyInfo: CompanyInfo;
@@ -23,14 +24,65 @@ export const RecruitmentPage: React.FC<RecruitmentPageProps> = ({
     privacyAgreed: false,
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [hpWebsite, setHpWebsite] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.privacyAgreed) {
-      alert('개인정보 수집 및 이용에 동의해주세요.');
+    setErrorMessage('');
+
+    const trimmedName = formData.name.trim();
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMessage('성함을 2자 이상 입력해 주세요.');
       return;
     }
-    setSubmitted(true);
+    if (cleanPhone.length < 9 || cleanPhone.length > 12) {
+      setErrorMessage('올바른 연락처(전화번호)를 입력해 주세요.');
+      return;
+    }
+    if (!formData.privacyAgreed) {
+      setErrorMessage('개인정보 수집 및 이용에 동의해 주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/consultation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'planner-recruitment',
+          name: trimmedName,
+          phone: formData.phone.trim(),
+          consultationType: '설계사 상담',
+          experience: formData.experienceType,
+          preferredTime: formData.consultTime,
+          message: formData.motivation.trim(),
+          privacyAgreed: formData.privacyAgreed,
+          hp_website: hpWebsite,
+          sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/recruit'),
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success) {
+        setSubmitted(true);
+      } else {
+        setErrorMessage(data?.message || '상담 신청 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    } catch (err) {
+      console.error('[RecruitmentPage Submit Error]', err);
+      setErrorMessage('상담 신청 처리 중 문제가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -346,12 +398,44 @@ export const RecruitmentPage: React.FC<RecruitmentPageProps> = ({
                     </label>
                   </div>
 
+                  {/* Honeypot field for anti-spam bots */}
+                  <input
+                    type="text"
+                    name="hp_website"
+                    value={hpWebsite}
+                    onChange={(e) => setHpWebsite(e.target.value)}
+                    style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                  />
+
+                  {/* Error message */}
+                  {errorMessage && (
+                    <div className="p-3 bg-rose-900/60 border border-rose-500/50 text-rose-200 text-xs rounded-xl font-medium">
+                      {errorMessage}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-bold rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Send className="w-4 h-4" />
-                    <span>설계사 지원 신청서 제출하기</span>
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>신청서 전송 중...</span>
+                      </span>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>설계사 지원 신청서 제출하기</span>
+                      </>
+                    )}
                   </button>
                 </form>
               )}

@@ -3,6 +3,8 @@ export interface RouteMeta {
   title: string;
   description: string;
   category?: string;
+  keywords?: string;
+  ogImage?: string;
   breadcrumb: { name: string; path?: string }[];
 }
 

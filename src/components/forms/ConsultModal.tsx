@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShieldCheck, CheckCircle2, Phone, Calendar, User, FileQuestion, MessageSquare } from 'lucide-react';
 import { ConsultFormData, CompanyInfo } from '../../types';
+import { getCanonicalUrl } from '../../config/site';
 
 interface ConsultModalProps {
   isOpen: boolean;
@@ -28,8 +29,10 @@ export const ConsultModal: React.FC<ConsultModalProps> = ({
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [referenceId, setReferenceId] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [hpWebsite, setHpWebsite] = useState('');
 
   // Close on Escape key and lock body scroll
   useEffect(() => {
@@ -69,14 +72,19 @@ export const ConsultModal: React.FC<ConsultModalProps> = ({
     setFormData((prev) => ({ ...prev, phone: val }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) {
-      setErrorMsg('성함을 입력해 주세요.');
+    setErrorMsg('');
+
+    const trimmedName = formData.name.trim();
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+
+    if (!trimmedName || trimmedName.length < 2) {
+      setErrorMsg('성함을 2자 이상 입력해 주세요.');
       return;
     }
-    if (formData.phone.replace(/[^0-9]/g, '').length < 10) {
-      setErrorMsg('올바른 연락처(10~11자리)를 입력해 주세요.');
+    if (cleanPhone.length < 9 || cleanPhone.length > 12) {
+      setErrorMsg('올바른 연락처(전화번호)를 입력해 주세요.');
       return;
     }
     if (!formData.agreePrivacy) {
@@ -84,14 +92,48 @@ export const ConsultModal: React.FC<ConsultModalProps> = ({
       return;
     }
 
-    setErrorMsg('');
-    const genId = 'HK-CS-' + Math.floor(100000 + Math.random() * 900000);
-    setReferenceId(genId);
-    setIsSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/consultation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'insurance-consultation',
+          name: trimmedName,
+          phone: formData.phone.trim(),
+          category: formData.category,
+          preferredTime: formData.preferredTime,
+          message: formData.message.trim(),
+          privacyAgreed: formData.agreePrivacy,
+          hp_website: hpWebsite,
+          sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/consulting/consultation'),
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data?.success) {
+        const genId = 'HK-CS-' + Math.floor(100000 + Math.random() * 900000);
+        setReferenceId(genId);
+        setIsSubmitted(true);
+      } else {
+        setErrorMsg(data?.message || '상담 신청 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    } catch (err) {
+      console.error('[ConsultModal Submit Error]', err);
+      setErrorMsg('상담 신청 중 오류가 발생했습니다. 네트워크 연결을 확인하고 다시 시도해 주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
     setIsSubmitted(false);
+    setIsSubmitting(false);
+    setErrorMsg('');
     setFormData({
       name: '',
       phone: '',
@@ -300,12 +342,42 @@ export const ConsultModal: React.FC<ConsultModalProps> = ({
                 </label>
               </div>
 
+              {/* Honeypot field for anti-spam bots */}
+              <input
+                type="text"
+                name="hp_website"
+                value={hpWebsite}
+                onChange={(e) => setHpWebsite(e.target.value)}
+                style={{ display: 'none', position: 'absolute', left: '-9999px' }}
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+
+              {/* Error Message Banner */}
+              {errorMsg && (
+                <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl font-medium flex items-center gap-2">
+                  <span className="font-bold">안내:</span> {errorMsg}
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2"
+                disabled={isSubmitting}
+                className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer disabled:cursor-not-allowed"
               >
-                <span>무료 보험 상담 신청하기</span>
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>접수 처리 중...</span>
+                  </span>
+                ) : (
+                  <span>무료 보험 상담 신청하기</span>
+                )}
               </button>
 
               <p className="text-[11px] text-center text-slate-400">

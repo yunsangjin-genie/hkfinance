@@ -30,8 +30,8 @@ import { FAQPage } from './pages/FAQPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsPage } from './pages/TermsPage';
 
-export default function App() {
-  const { currentPath, navigate } = useRouter();
+export default function App({ initialPath }: { initialPath?: string } = {}) {
+  const { currentPath, navigate } = useRouter(initialPath);
   const [consultModalOpen, setConsultModalOpen] = useState(false);
   const [consultCategory, setConsultCategory] = useState<string>('보험 전체 점검 (보장분석)');
   const [recruitModalOpen, setRecruitModalOpen] = useState(false);
@@ -39,23 +39,27 @@ export default function App() {
 
   // Persistent Company & Branch Information
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>(() => {
-    try {
-      const saved = localStorage.getItem('hk_branch_company_info');
-      if (saved) {
-        return { ...initialCompanyInfo, ...JSON.parse(saved) };
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('hk_branch_company_info');
+        if (saved) {
+          return { ...initialCompanyInfo, ...JSON.parse(saved) };
+        }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore
     }
     return initialCompanyInfo;
   });
 
   const handleSaveCompanyInfo = (updated: CompanyInfo) => {
     setCompanyInfo(updated);
-    try {
-      localStorage.setItem('hk_branch_company_info', JSON.stringify(updated));
-    } catch {
-      // ignore
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('hk_branch_company_info', JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
     }
   };
 

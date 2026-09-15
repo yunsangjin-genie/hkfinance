@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Phone, Mail, MapPin, Copy, Check, Download, Printer, Share2, Building2, Smartphone, FileText } from 'lucide-react';
 import { CompanyInfo } from '../../types';
 import { HKLogo } from './HKLogo';
+import { SITE_URL } from '../../config/site';
 
 interface DigitalBusinessCardProps {
   companyInfo: CompanyInfo;
@@ -44,7 +45,7 @@ TEL;TYPE=FAX:${companyInfo.fax || '0504-441-8554'}
 EMAIL;TYPE=INTERNET,WORK:${companyInfo.email || 'genie.yoon@gmail.com'}
 ADR;TYPE=WORK:;;${companyInfo.address} ${companyInfo.detailAddress};서울;;${companyInfo.zipCode || '07997'};대한민국
 NOTE:HK금융파트너스 고객 맞춤 보장분석 및 보험설계사 멘토링
-URL:https://hkfp-mokdong.co.kr
+URL:${SITE_URL}
 END:VCARD`;
 
     const blob = new Blob([vCardData], { type: 'text/vcard;charset=utf-8' });
