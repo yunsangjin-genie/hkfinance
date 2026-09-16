@@ -1,0 +1,3 @@
+/api/consultation  /.netlify/functions/consultation  200
+/api/recruitment   /.netlify/functions/recruitment   200
+/api/health        /.netlify/functions/health        200

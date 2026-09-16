@@ -47,6 +47,15 @@ export function escapeHtml(str: unknown): string {
     .replace(/\n/g, '<br/>');
 }
 
+// Mask phone number for safe logging (e.g., 010-****-8554)
+export function maskPhone(phone: string): string {
+  const clean = phone.replace(/[^0-9]/g, '');
+  if (clean.length >= 8) {
+    return clean.slice(0, 3) + '-****-' + clean.slice(-4);
+  }
+  return '***';
+}
+
 export type ConsultationCategory =
   | '보험 전체 점검'
   | '보장분석'
@@ -293,17 +302,20 @@ export async function processConsultation(
   payload: ConsultationPayload,
   clientIp: string
 ): Promise<ConsultationResult> {
-  // 1. Honeypot spam check: if filled, quietly succeed without sending
+  const cleanIp = (clientIp || '127.0.0.1').split(',')[0].trim();
+
+  // 1. Honeypot spam check: if filled, quietly succeed without sending spam
   if (payload.hp_website && payload.hp_website.trim().length > 0) {
-    console.warn(`[SPAM BLOCKED] Honeypot triggered from IP: ${clientIp}`);
+    console.warn(`[CONSULTATION] honeypot triggered from IP: ${cleanIp}`);
     return {
       success: true,
-      message: '상담 신청이 접수되었습니다.',
+      message: '상담 신청이 접수되었습니다. 확인 후 연락드리겠습니다.',
     };
   }
 
   // 2. Rate limit check
-  if (!checkRateLimit(clientIp)) {
+  if (!checkRateLimit(cleanIp)) {
+    console.warn(`[CONSULTATION] rate limit exceeded from IP: ${cleanIp}`);
     return {
       success: false,
       message: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
@@ -313,38 +325,60 @@ export async function processConsultation(
   // 3. Validation
   const name = (payload.name || '').trim();
   const phone = (payload.phone || '').trim();
-  const privacyAgreed = Boolean(payload.privacyAgreed ?? payload.privacyConsent);
+  const privacyAgreed = Boolean(
+    payload.privacyAgreed ?? payload.privacyConsent ?? (payload as any).agreePrivacy
+  );
 
-  if (!name || name.length < 2 || name.length > 50) {
-    return {
-      success: false,
-      message: '신청자 이름을 올바르게 입력해 주세요 (2자 이상 50자 이하).',
-    };
-  }
-
-  // Phone regex: accepts common Korean phone formats
-  const cleanPhone = phone.replace(/[^0-9]/g, '');
-  if (cleanPhone.length < 9 || cleanPhone.length > 12) {
-    return {
-      success: false,
-      message: '연락처를 올바른 전화번호 형식으로 입력해 주세요.',
-    };
-  }
-
-  if (!privacyAgreed) {
-    return {
-      success: false,
-      message: '개인정보 수집 및 이용에 동의해야 상담 신청이 가능합니다.',
-    };
-  }
-
-  // Determine if this is a planner recruitment inquiry
+  // Determine inquiry type
   const isRecruitment =
     payload.type === 'planner-recruitment' ||
     payload.type === 'recruitment' ||
     payload.consultationType === '설계사 상담' ||
     payload.category === '설계사 상담' ||
     Boolean(payload.experience || payload.experienceType);
+
+  const inquiryTypeStr = isRecruitment ? '설계사 상담' : '보험 상담';
+
+  if (!name || name.length < 2 || name.length > 50) {
+    console.warn(`[CONSULTATION] validation failed: invalid name (length: ${name.length})`);
+    return {
+      success: false,
+      message: '신청자 성함을 2자 이상 50자 이하로 올바르게 입력해 주세요.',
+    };
+  }
+
+  // Phone normalization: accepts 01026278554, 010-2627-8554, etc.
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  if (cleanPhone.length < 9 || cleanPhone.length > 12) {
+    console.warn(`[CONSULTATION] validation failed: invalid phone format (digits: ${cleanPhone.length})`);
+    return {
+      success: false,
+      message: '연락처를 올바른 전화번호 형식으로 입력해 주세요 (예: 010-1234-5678).',
+    };
+  }
+
+  if (!privacyAgreed) {
+    console.warn(`[CONSULTATION] validation failed: privacy consent not given`);
+    return {
+      success: false,
+      message: '개인정보 수집 및 이용에 동의해야 상담 신청이 가능합니다.',
+    };
+  }
+
+  // Normalize phone for display in email
+  let formattedPhone = cleanPhone;
+  if (cleanPhone.length === 11) {
+    formattedPhone = cleanPhone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+  } else if (cleanPhone.length === 10) {
+    formattedPhone = cleanPhone.startsWith('02')
+      ? cleanPhone.replace(/(\d{2})(\d{4})(\d{4})/, '$1-$2-$3')
+      : cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  }
+
+  console.log(
+    `[CONSULTATION] request received (Type: ${inquiryTypeStr}, Name: ${name}, Phone: ${maskPhone(cleanPhone)})`
+  );
+  console.log(`[CONSULTATION] validation success`);
 
   const preferredTime = (payload.preferredTime || '').trim() || '상관없음 (빠른 상담 희망)';
   const message = (payload.message || payload.motivation || '').trim();
@@ -361,7 +395,7 @@ export async function processConsultation(
     subject = `[목동지점 설계사 상담 신청] ${name}`;
     htmlContent = buildRecruitmentEmailHtml({
       name,
-      phone,
+      phone: formattedPhone,
       experience,
       currentJob,
       preferredTime,
@@ -371,12 +405,13 @@ export async function processConsultation(
     });
   } else {
     const category =
-      (payload.category || payload.consultationType || '').trim() || '보험 전체 점검';
+      (payload.category || payload.consultationType || (payload as any).consultType || '').trim() ||
+      '보장분석';
 
     subject = `[목동지점 보험상담 신청] ${name}`;
     htmlContent = buildInsuranceEmailHtml({
       name,
-      phone,
+      phone: formattedPhone,
       category,
       preferredTime,
       message,
@@ -385,25 +420,22 @@ export async function processConsultation(
     });
   }
 
-  // 4. Send via Resend or log in Development
+  // 4. Send via Resend
   const receiverEmail = process.env.CONSULTATION_RECEIVER_EMAIL || 'genie.yoon@gmail.com';
   const rawFrom = process.env.CONSULTATION_FROM_EMAIL || 'onboarding@resend.dev';
   const fromEmail = rawFrom.includes('<') ? rawFrom : `HK금융파트너스 목동지점 <${rawFrom}>`;
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn('[CONSULTATION_DEV_MODE] RESEND_API_KEY is not set in environment.');
-    console.log(`[CONSULTATION_DEV_MODE] Would send email to: ${receiverEmail}`);
-    console.log(`[CONSULTATION_DEV_MODE] Subject: ${subject}`);
-    console.log(`[CONSULTATION_DEV_MODE] Type: ${isRecruitment ? 'Recruitment' : 'Insurance'}`);
+    console.error('[CONSULTATION] RESEND_API_KEY missing in environment variables.');
     return {
-      success: true,
-      message: '상담 신청이 접수되었습니다.',
-      details: 'DEV_MODE: RESEND_API_KEY not configured, logged to console.',
+      success: false,
+      message: '상담 신청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
     };
   }
 
   try {
+    console.log(`[CONSULTATION] sending email via Resend to ${receiverEmail}`);
     const resend = new Resend(apiKey);
     const result = await resend.emails.send({
       from: fromEmail,
@@ -413,25 +445,23 @@ export async function processConsultation(
     });
 
     if (result.error) {
-      console.error('[Resend Error]', result.error);
+      console.error('[CONSULTATION] email send failed:', result.error);
       return {
         success: false,
         message: '상담 신청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
-        details: result.error.message,
       };
     }
 
-    console.log(`[Consultation Success] Email sent to ${receiverEmail}, subject: "${subject}", id: ${result.data?.id}`);
+    console.log(`[CONSULTATION] email success (id: ${result.data?.id})`);
     return {
       success: true,
-      message: '상담 신청이 접수되었습니다.',
+      message: '상담 신청이 접수되었습니다. 확인 후 연락드리겠습니다.',
     };
   } catch (err: any) {
-    console.error('[Consultation Send Exception]', err);
+    console.error('[CONSULTATION] server error:', err?.message || err);
     return {
       success: false,
       message: '상담 신청 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.',
-      details: err?.message,
     };
   }
 }

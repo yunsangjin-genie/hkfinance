@@ -64,6 +64,7 @@ export const ConsultingPage: React.FC<ConsultingPageProps> = ({
           preferredTime: formData.preferredTime,
           message: formData.message.trim(),
           privacyAgreed: formData.privacyAgreed,
+          privacyConsent: formData.privacyAgreed,
           hp_website: hpWebsite,
           sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/consulting/consultation'),
         }),

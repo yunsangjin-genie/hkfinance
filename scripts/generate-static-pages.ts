@@ -272,6 +272,12 @@ console.log(`  ✓ Sitemap written to: ${distSitemapPath}`);
 console.log(`  ✓ Sitemap synced to: ${publicSitemapPath}`);
 console.log(`  ✓ Total URLs in sitemap: ${allRoutePaths.length}`);
 
+// Write dist/_redirects for Netlify serverless API routing
+const distRedirectsPath = path.join(distDir, '_redirects');
+const redirectsContent = `/api/consultation  /.netlify/functions/consultation  200\n/api/recruitment   /.netlify/functions/recruitment   200\n/api/health        /.netlify/functions/health        200\n`;
+fs.writeFileSync(distRedirectsPath, redirectsContent, 'utf-8');
+console.log(`  ✓ dist/_redirects written with Netlify API redirects`);
+
 // ============================================================================
 // Automated Strict Validation (Fails build if any legacy domain or defect found)
 // ============================================================================

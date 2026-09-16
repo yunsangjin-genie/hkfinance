@@ -108,6 +108,7 @@ export const ConsultModal: React.FC<ConsultModalProps> = ({
           preferredTime: formData.preferredTime,
           message: formData.message.trim(),
           privacyAgreed: formData.agreePrivacy,
+          privacyConsent: formData.agreePrivacy,
           hp_website: hpWebsite,
           sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/consulting/consultation'),
         }),

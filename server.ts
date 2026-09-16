@@ -17,6 +17,17 @@ app.use(express.urlencoded({ extended: true }));
 // Trust proxy for correct client IP detection behind Cloud Run / reverse proxies
 app.set('trust proxy', true);
 
+// CORS middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({

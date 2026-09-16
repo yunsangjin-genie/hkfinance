@@ -95,6 +95,7 @@ export const RecruitModal: React.FC<RecruitModalProps> = ({ isOpen, onClose, com
           preferredTime: formData.preferredTime,
           message: formData.message.trim(),
           privacyAgreed: formData.agreePrivacy,
+          privacyConsent: formData.agreePrivacy,
           hp_website: hpWebsite,
           sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/recruit'),
         }),

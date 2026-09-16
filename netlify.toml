@@ -1,0 +1,22 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/consultation"
+  to = "/.netlify/functions/consultation"
+  status = 200
+
+[[redirects]]
+  from = "/api/recruitment"
+  to = "/.netlify/functions/recruitment"
+  status = 200
+
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200

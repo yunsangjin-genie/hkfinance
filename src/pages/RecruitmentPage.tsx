@@ -65,6 +65,7 @@ export const RecruitmentPage: React.FC<RecruitmentPageProps> = ({
           preferredTime: formData.consultTime,
           message: formData.motivation.trim(),
           privacyAgreed: formData.privacyAgreed,
+          privacyConsent: formData.privacyAgreed,
           hp_website: hpWebsite,
           sourceUrl: typeof window !== 'undefined' ? window.location.href : getCanonicalUrl('/recruit'),
         }),
