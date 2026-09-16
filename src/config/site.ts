@@ -23,6 +23,7 @@ export const DEFAULT_OG_IMAGE_HEIGHT = 630;
 export const DEFAULT_OG_IMAGE_TYPE = 'image/jpeg';
 
 export const NAVER_SITE_VERIFICATION = 'ff2e8d780a40336ec093ea8328ad7f13f8be9b18';
+export const GOOGLE_SITE_VERIFICATION = 'Zh4Giw_j4IQgc-PXym10u1ogxm-2eKthB4Qq9II7tao';
 
 export const SITE_CONFIG = {
   domain: SITE_DOMAIN,
@@ -43,6 +44,7 @@ export const SITE_CONFIG = {
   ogImageHeight: DEFAULT_OG_IMAGE_HEIGHT,
   ogImageType: DEFAULT_OG_IMAGE_TYPE,
   naverSiteVerification: NAVER_SITE_VERIFICATION,
+  googleSiteVerification: GOOGLE_SITE_VERIFICATION,
 } as const;
 
 /**

@@ -8,6 +8,7 @@ import {
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_TYPE,
   NAVER_SITE_VERIFICATION,
+  GOOGLE_SITE_VERIFICATION,
 } from '../config/site';
 
 // Normalize path to clean pathname (e.g., '/insurance/silson')
@@ -152,8 +153,9 @@ export function useRouter(initialPath?: string) {
     setMetaTag('name', 'twitter:description', meta.description);
     setMetaTag('name', 'twitter:image', targetOgImage);
 
-    // Naver Search Advisor Verification tag
+    // Search Engine Verification (Naver & Google)
     setMetaTag('name', 'naver-site-verification', NAVER_SITE_VERIFICATION);
+    setMetaTag('name', 'google-site-verification', GOOGLE_SITE_VERIFICATION);
   }, [meta]);
 
   return {

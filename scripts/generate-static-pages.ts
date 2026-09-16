@@ -15,6 +15,7 @@ import {
   DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_TYPE,
   NAVER_SITE_VERIFICATION,
+  GOOGLE_SITE_VERIFICATION,
 } from '../src/config/site';
 import { generateOgImage } from './generate-og-image';
 
@@ -186,6 +187,9 @@ for (const routePath of allRoutePaths) {
 
     // Replace Naver Search Advisor Verification tag
     pageHtml = upsertMetaTag(pageHtml, 'name', 'naver-site-verification', NAVER_SITE_VERIFICATION);
+
+    // Replace Google Search Console Verification tag
+    pageHtml = upsertMetaTag(pageHtml, 'name', 'google-site-verification', GOOGLE_SITE_VERIFICATION);
 
     // Replace Geo Meta Tags for local SEO
     pageHtml = upsertMetaTag(pageHtml, 'name', 'geo.region', 'KR-11');
@@ -479,6 +483,24 @@ for (const htmlFile of allHtmlFiles) {
       validationErrors.push(`[Naver Verification Error in ${relPath}] naver-site-verification content '${naverMatches[0][1]}' does not match expected '${NAVER_SITE_VERIFICATION}'!`);
     }
   }
+
+  // Check Google Search Console Verification tag
+  const googleMatches = [...content.matchAll(/<meta\s+name="google-site-verification"\s+content="(.*?)"/gi)];
+  if (relPath === 'index.html') {
+    if (googleMatches.length === 0) {
+      validationErrors.push(`[Google Verification Error] <meta name="google-site-verification"> is missing in dist/index.html!`);
+    } else if (googleMatches.length > 1) {
+      validationErrors.push(`[Google Verification Error] Duplicate <meta name="google-site-verification"> detected (${googleMatches.length} tags) in dist/index.html!`);
+    } else if (googleMatches[0][1] !== GOOGLE_SITE_VERIFICATION) {
+      validationErrors.push(`[Google Verification Error] google-site-verification content '${googleMatches[0][1]}' does not match expected '${GOOGLE_SITE_VERIFICATION}'!`);
+    }
+  } else {
+    if (googleMatches.length > 1) {
+      validationErrors.push(`[Google Verification Error in ${relPath}] Duplicate <meta name="google-site-verification"> detected (${googleMatches.length} tags)!`);
+    } else if (googleMatches.length === 1 && googleMatches[0][1] !== GOOGLE_SITE_VERIFICATION) {
+      validationErrors.push(`[Google Verification Error in ${relPath}] google-site-verification content '${googleMatches[0][1]}' does not match expected '${GOOGLE_SITE_VERIFICATION}'!`);
+    }
+  }
 }
 
 // 6. Final validation verdict
@@ -495,6 +517,7 @@ if (validationErrors.length > 0) {
   console.log(`✅ Official OG Image: ${DEFAULT_OG_IMAGE} (1200x630, image/jpeg)`);
   console.log(`✅ Twitter Card: summary_large_image configured across all static pages`);
   console.log(`✅ Naver Search Advisor Verification: ${NAVER_SITE_VERIFICATION} confirmed in dist/index.html`);
+  console.log(`✅ Google Search Console Verification: ${GOOGLE_SITE_VERIFICATION} confirmed in dist/index.html`);
   console.log(`✅ Zero duplicate OG tags, zero duplicate verification tags, zero legacy domains found.`);
   console.log(`======================================================\n`);
 }
